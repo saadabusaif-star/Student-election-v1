@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Council Election</title>
+<style>
+:root{
+  --bg:#f4f6f5; --card:#ffffff; --ink:#15211c; --muted:#5d6b65; --line:#dfe5e2;
+  --brand:#0b6e4f; --brand-2:#0e8a63; --brand-soft:#e3f2ec; --accent:#c8102e;
+  --gold:#b88a00; --gold-soft:#fff5d6; --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 14px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#0f1513; --card:#18211d; --ink:#e8efeb; --muted:#9aa9a2; --line:#2a3631;
+  --brand:#2bb584; --brand-2:#37c894; --brand-soft:#173a2d; --gold:#e3b734; --gold-soft:#3a3113;
+  --shadow:0 1px 2px rgba(0,0,0,.3);}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button{font:inherit;cursor:pointer}
+input{font:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+header.top{background:var(--brand);color:#fff}
+header.top .wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:14px;padding-bottom:14px}
+.logo{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:22px}
+.ttl{flex:1;min-width:200px}
+.ttl input{background:transparent;border:0;color:#fff;font-size:20px;font-weight:700;width:100%;padding:2px 0;border-bottom:1px dashed transparent}
+.ttl input:hover,.ttl input:focus{border-bottom-color:rgba(255,255,255,.5);outline:none}
+.ttl small{opacity:.8}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:10px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--brand)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--brand-2)}
+.btn.danger{color:var(--accent)}
+.btn.ghost-w{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 16px}
+.chip{border:1px solid var(--line);background:var(--card);padding:6px 14px;border-radius:999px;font-weight:600;color:var(--muted)}
+.chip.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.sec-card{padding:14px;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;box-shadow:var(--shadow);transition:transform .08s,border-color .15s}
+.sec-card:hover{border-color:var(--brand);transform:translateY(-1px)}
+.sec-card h3{margin:0 0 6px;font-size:18px}
+.meta{color:var(--muted);font-size:13px}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--line);color:var(--muted)}
+.badge.live{background:var(--brand-soft);color:var(--brand)}
+.badge.done{background:var(--gold-soft);color:var(--gold)}
+.win{margin-top:8px;font-size:13px;font-weight:600;color:var(--gold)}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.spacer{flex:1}
+h2{margin:0;font-size:22px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:16px 0;overflow-x:auto}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;font-weight:600;color:var(--muted);white-space:nowrap}
+.tab.on{color:var(--brand);border-bottom-color:var(--brand)}
+.search{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.search:focus{outline:2px solid var(--brand);border-color:transparent}
+.slist{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin-top:12px}
+.sitem{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);text-align:left}
+.sitem:hover{border-color:var(--brand)}
+.sitem.on{border-color:var(--brand);background:var(--brand-soft)}
+.av{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;color:#fff}
+.check{margin-left:auto;width:22px;height:22px;border-radius:6px;border:2px solid var(--line);display:grid;place-items:center;color:#fff;flex:none}
+.sitem.on .check{background:var(--brand);border-color:var(--brand)}
+.panel{padding:16px;margin-bottom:12px}
+.note{color:var(--muted);font-size:14px}
+.tally{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--line)}
+.tally:last-child{border-bottom:0}
+.tally .nm{flex:1;font-weight:600}
+.key{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 7px}
+.cnt{font-size:26px;font-weight:800;min-width:48px;text-align:center;font-variant-numeric:tabular-nums}
+.pm{width:48px;height:48px;border-radius:12px;font-size:24px;font-weight:700;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.pm.plus{background:var(--brand);color:#fff;border-color:var(--brand)}
+.bar-row{margin:12px 0}
+.bar-top{display:flex;justify-content:space-between;font-weight:600;margin-bottom:4px;gap:8px}
+.bar{height:14px;border-radius:7px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--brand);border-radius:7px}
+.bar-row.first .bar i{background:var(--gold)}
+.winner{padding:18px;border-radius:14px;background:var(--gold-soft);color:var(--ink);display:flex;gap:14px;align-items:center;margin-bottom:12px}
+.winner .t{font-size:13px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.winner .n{font-size:22px;font-weight:800}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px}
+.stat{padding:12px 14px}
+.stat b{display:block;font-size:24px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line)}
+th{font-size:13px;color:var(--muted)}
+.toggle{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.toggle input{width:18px;height:18px;accent-color:var(--brand)}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.quick-start{padding:18px 20px;margin:16px 0;background:linear-gradient(135deg,var(--brand-soft),var(--card));border-color:var(--brand)}
+.quick-start h3{margin:0 0 4px;font-size:20px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.step{display:flex;gap:9px;align-items:flex-start;font-size:13px;color:var(--muted)}
+.step b{display:grid;place-items:center;flex:none;width:25px;height:25px;border-radius:50%;background:var(--brand);color:#fff}
+.sec-card .start{margin-top:12px;width:100%;justify-content:center}.class-link{display:block;margin-top:8px;color:var(--navy);font-size:12px;font-weight:800;text-align:center;text-decoration:underline}
+@media (max-width:600px){.steps{grid-template-columns:1fr}.quick-start{padding:15px}}
+
+/* Kiosk */
+#kiosk{position:fixed;inset:0;background:var(--bg);z-index:50;display:none;flex-direction:column}
+#kiosk.show{display:flex}
+.k-head{background:var(--brand);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px}
+.k-head h3{margin:0;font-size:20px;flex:1}
+.k-body{flex:1;overflow:auto;padding:16px;max-width:1100px;width:100%;margin:0 auto}
+.k-title{font-size:26px;font-weight:800;text-align:center;margin:10px 0 4px}
+.k-sub{text-align:center;color:var(--muted);margin-bottom:16px}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.ccard{padding:22px 16px;border-radius:16px;border:2px solid var(--line);background:var(--card);color:var(--ink);text-align:center;box-shadow:var(--shadow)}
+.ccard:hover{border-color:var(--brand)}
+.ccard .av{width:64px;height:64px;font-size:22px;margin:0 auto 10px}
+.ccard .n{font-weight:700;font-size:17px}
+.ccard .num{color:var(--muted);font-size:13px;margin-top:4px}
+.hold{position:relative;overflow:hidden}
+.hold i{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,255,255,.3)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
+.modal.show{display:flex}
+.modal .box{background:var(--card);color:var(--ink);border-radius:18px;padding:24px;max-width:420px;width:100%;text-align:center}
+.modal .box h3{margin:0 0 8px;font-size:22px}
+.thanks{text-align:center;padding:60px 10px}
+.thanks .big{font-size:72px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;font-weight:600;z-index:70;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+td:first-child{white-space:nowrap}
+@media (max-width:600px){ .ttl input{font-size:16px} .cnt{font-size:22px} .pm{width:44px;height:44px} h2{font-size:19px} }
+@media print{ header.top,.tabs,.no-print,.btn{display:none!important} body{background:#fff} .card{box-shadow:none} }
+
+:root{--navy-deep:#081B45;--navy:#0D2C6B;--navy-light:#17419A;--gold:#FFC845;--gold-deep:#E8A800;--gold-soft:#FFEAB2;--bg:#F5F8FF;--ink:#10203F;--muted:#4C5A7A;--line:rgba(13,44,107,.12);--brand:var(--navy);--brand-2:var(--navy-light);--brand-soft:#EAF0FF;--card:#fff;--shadow:0 12px 30px -12px rgba(8,27,69,.35)}
+body{background:var(--bg);color:var(--ink);font-family:"Nunito",-apple-system,"Segoe UI",sans-serif;line-height:1.55}
+h2,h3,h4,.ttl{font-family:"Baloo 2","Segoe UI",sans-serif}
+.wrap{max-width:1200px;padding-left:28px;padding-right:28px}
+.site-header{background:linear-gradient(180deg,var(--navy-deep) 0%,var(--navy) 100%);color:#fff}
+.top-bar{display:flex;justify-content:space-between;align-items:center;padding:9px 28px;font-size:12.5px;color:var(--gold-soft);max-width:1200px;margin:0 auto}
+.top-bar-note{display:flex;align-items:center;gap:6px;font-weight:700}.lang-toggle{display:flex;gap:4px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:4px}.lang-toggle button{border:0;background:transparent;color:#fff;font-size:12.5px;font-weight:800;padding:5px 14px;border-radius:999px}.lang-toggle button.active{background:var(--gold);color:var(--navy-deep)}
+.letterhead{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:12px 28px;max-width:1200px;margin:0 auto;border-top:1px solid rgba(255,255,255,.14);flex-wrap:wrap;direction:ltr}.letter-side{display:flex;align-items:center;gap:12px}.letter-side.right{text-align:right}.letter-col{font-size:11.5px;line-height:1.6;color:rgba(255,255,255,.85)}.letter-col p{margin:0}.letter-col .strong{color:var(--gold);font-weight:800;font-size:12.5px}.letter-col.ar{font-family:"Cairo","Segoe UI",sans-serif;font-size:12.5px}.logo-badge{width:46px;height:46px;border-radius:50%;background:#fff;border:2px solid var(--gold);padding:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center}.logo-badge img{width:100%;height:100%;object-fit:contain;border-radius:50%}.logo-badge.no-img::after{content:"🎓";font-size:22px}.flag-uae{width:38px;height:25px;border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.4);flex-shrink:0}.flag-uae svg{display:block;width:100%;height:100%}
+.site-nav{background:linear-gradient(90deg,var(--navy-deep),var(--navy));border-bottom:3px solid var(--gold);position:sticky;top:0;z-index:50}.nav-inner{display:flex;gap:26px;padding-top:10px;padding-bottom:10px;overflow-x:auto;font-size:14.5px;font-weight:800;scrollbar-width:none}.site-nav a{display:flex;align-items:center;gap:7px;color:var(--gold-soft);text-decoration:none;white-space:nowrap;padding:4px 2px;border-bottom:2px solid transparent}.site-nav a:hover{color:#fff;border-bottom-color:var(--gold)}
+.site-footer{background:linear-gradient(180deg,var(--navy-light) 0%,var(--navy-deep) 100%);color:rgba(255,255,255,.82);border-top:4px solid var(--gold);margin-top:30px}.footer-top{padding:40px 28px 20px}.footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:36px}.site-footer h4{color:var(--gold-soft);margin:0 0 10px;font-size:18px}.site-footer p{margin:0;max-width:340px}.site-footer ul{list-style:none;margin:0;padding:0}.site-footer li{margin:6px 0}.site-footer a{color:var(--gold-soft);text-decoration:none}.site-footer a:hover{color:#fff;text-decoration:underline}.motto-row{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;padding:14px 0;font-family:"Baloo 2","Segoe UI",sans-serif;font-weight:800;font-size:13px;letter-spacing:.5px;color:var(--gold-soft)}.motto-row span:not(:last-child)::after{content:"•";margin-inline-start:14px;opacity:.5}.footer-bottom{padding:6px 28px 24px;font-size:12.5px;text-align:center}
+.btn.primary{background:var(--navy);border-color:var(--navy)}.btn.primary:hover{background:var(--navy-light)}.chip.on,.badge.live{background:var(--brand-soft);color:var(--navy);border-color:var(--navy)}.winner{background:var(--gold-soft)}
+@media (max-width:600px){.top-bar-note{display:none}.top-bar{justify-content:flex-end;padding-left:16px;padding-right:16px}.letterhead{justify-content:center;padding-left:16px;padding-right:16px}.footer-grid{grid-template-columns:1fr;gap:22px}.footer-top{padding-left:16px;padding-right:16px}.footer-bottom{padding-left:16px;padding-right:16px}}
+</style>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<header class="site-header">
+  <div class="top-bar">
+    <span class="top-bar-note">🇦🇪 <span>Building Brave Tomorrow</span></span>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" class="active">EN</button>
+      <button type="button">عربي</button>
+    </div>
+  </div>
+  <div class="letterhead">
+    <div class="letter-side left">
+      <div class="flag-uae" role="img" aria-label="Flag of the United Arab Emirates">
+        <svg viewBox="0 0 100 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="100" height="60" fill="#FFFFFF"/><rect width="100" height="20" fill="#00732F"/>
+          <rect y="40" width="100" height="20" fill="#000000"/><rect width="25" height="60" fill="#FF0000"/>
+        </svg>
+      </div>
+      <div class="letter-col en"><p class="strong">UNITED ARAB EMIRATES</p><p>MINISTRY OF EDUCATION</p><p>THE FIRST ACADEMY – PRIVATE, AJMAN</p></div>
+    </div>
+    <div class="letter-side right" dir="rtl">
+      <div class="letter-col ar"><p class="strong">الإمارات العربية المتحدة</p><p>وزارة التربية والتعليم</p><p>مدرسة الأكاديمية الأولى الخاصة - عجمان</p></div>
+      <div class="logo-badge"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4bcqYCf6vl8HjqyLT_uE8tNqEz8euqWq0Z9y0kgCaVQ&s=10" alt="The First Academy logo" onerror="this.parentNode.classList.add('no-img');this.remove()"></div>
+    </div>
+  </div>
+  <nav class="site-nav" aria-label="Election navigation">
+    <div class="wrap nav-inner">
+      <a href="#" onclick="go('home');return false"><span class="nav-icon">🗳️</span><span>Student election</span></a>
+      <a href="#" onclick="go('home');return false"><span class="nav-icon">🎯</span><span>Choose section</span></a>
+      <a href="#" onclick="go('summary');return false"><span class="nav-icon">🏅</span><span>All results</span></a>
+      <a href="#rules"><span class="nav-icon">🛡️</span><span>Voting rules</span></a>
+    </div>
+  </nav>
+</header>
+<input id="elTitle" type="hidden" value="Class Representative Election 2026–27"><main class="wrap" id="app"></main>
+
+<div id="kiosk">
+  <div class="k-head">
+    <h3 id="kTitle"></h3>
+    <button class="btn ghost-w hold" id="kExit" title="Press and hold to exit">Hold to exit<i></i></button>
+  </div>
+  <div class="k-body" id="kBody"></div>
+</div>
+
+<div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
+<footer class="site-footer" id="rules">
+  <div class="footer-top wrap">
+    <div class="footer-grid">
+      <div><h4>The First Academy</h4><p>A student election page supporting safe, meaningful, and fair student leadership choices.</p></div>
+      <div><h4>Quick links</h4><ul><li><a href="#" onclick="go('home');return false">Choose section</a></li><li><a href="#" onclick="go('summary');return false">All results</a></li><li><a href="https://www.firstacademy.org/" target="_blank" rel="noopener">Main school website</a></li></ul></div>
+      <div><h4>Contact</h4><ul><li>ICT Department</li><li>Ajman, United Arab Emirates</li><li><a href="mailto:ict@firstacademy.org">ict@firstacademy.org</a></li></ul></div>
+    </div>
+  </div>
+  <div class="motto-row"><span>RESPECT</span><span>BELONG</span><span>ACHIEVE</span></div>
+  <div class="wrap footer-bottom"><span>© 2026 The First Academy · ICT Department</span></div>
+</footer>
+<div class="toast" id="toast"></div>
+<input type="file" id="importFile" accept=".json" hidden>
+
+<script>
+const DATA = {"GR-7 - A": ["Abdulla Humaid Abdulla Humaid Amer", "Alharth ( Ahmad Hammam ) Mazin Abdulqader", "Ali Majed Ali Mannoor Alawadhi", "Ali Omar Abdulrahman Salem Alnuaimi", "Hamad Ahmed Juma Ali Alshamsi", "Hamad Jamal Eissa Bushehab Alsuwaidi", "Hamdan Ehtisham Ehtisham Ul Hassan Tariq", "HAMDAN HUMAID OBAID ALREZZI ALSHAMSI", "Hamza Ahmed Fathi Abdelfattah Nafea", "Humaid Mohamed Abdelrahman Saif Alsuwaidi", "Humaid Saud Humaid Binhendi Alaleeli", "Jehad Abdullatif Hamdi", "Khalfan Mubarak Khalfan Mubarak Almheiri", "Khalid Ali Hassan Haider Jelani", "Khamis Jasim Khamis Ali Altamimi", "Mohamad Humaid Youssef Hassan Alnajar", "Mohammed Aamer Mohammed Hassan Taher", "Mubarak Mohamed Saeed Sulaiman Almazrouei", "Mufreh Abdalla Mufreh Matar Almesafri", "Muhammed Ismail Usman Ahmed", "Obaid Ghanim Obaid Ghanim Alaleeli", "Rashed Humaid Salem Madhoosh Alshamsi", "Rashid Hamad Shehab Ahmed Almandoos", "Saif Aldeen Anas Menla", "Saif Mohamad Suleiman Mohamad Darwish", "Salim Sulaiman Salim Sulaiman Alkaabi", "Sam Mahmood Abdolaziz Chashmmalak", "Skeikh Hamdan Bin Humood Bin Rashed Alnuaimi", "Suhail Mohammed Saeed Obaid Almatrooshi", "Zeyad Mahmoud Elsayed Ahmed Elhaggawy"], "GR-7 - B": ["Abdalla Jubran Nasser Binjubran Alsuwaidi", "Abdalrahman T Z Alajouz", "Abdollah Mohammad Rafie Khaja Janahi", "Abdulla Abdulrahman Majid Bin Darwish Al Ali", "Abdulla Ali Bahram Abdallah Almazam", "Abdulla Mubarak Rashid Jasim Alshamsi", "ABDULRAHMAN ABDULAZIZ AHMED DAD RAHIM ALBLOOSHI", "Ahmad Abdulla Ansari", "AHMED MAHDI ABUBAKER AL SHAKA", "Ali Khaled Salem Ahmed Alhammadi", "Ebrahim Mohammed Ahmad Saleh Jamal", "Eyad Amr Ismail Mohamed Fathy Ismail", "Ghyth Mohammed Khalifa Salim Al Kaabi", "Hamid Ismaeil Ali Anbar Alraeesi", "Hassan Fayez Abdulaziz Alajmani Alblooki", "Hassan Jalal Soroorpoor", "Humaid Nabeel Nabeel", "Hussain Yousef Hussain Al Barkat Alameeri", "Mohammad Aziz Mohammed Almandoos Alblooshi", "Mohammed Khaled Ali Mohammed Alshehhi", "Omar Nawaf Obaid Saif Almatrooshi", "Rashid Faris", "Saif Ali Ahmed Buseem Alawadhi", "Salem Abdulaziz Salem Alaboodi Alteneiji", "Salman Adel Hamidi", "Shaikh Saeed Binabdulaziz Binsaeed Alnuaimi", "Yousef Maeen Ahmed Alhayashi", "Yousuf Hisham Said Marie", "Zayed Khalifa Hamza Dadalla Hamza", "Zayed Tareq Omar Ahmad Mohammed"], "GR-7 - C": ["Abdulaziz Eissa Murad Al Mandoos Alblooshi", "Abdulrahman Mohammed Abulrahman Abdulla Alawadhi", "Abdulrahman Saad Hamad Marei Alseqetri", "Ahmed Ali Hassan Alshaer Alaleeli", "Ahmed Mohammed Ali Mohammed Alhosani", "Ahmed Yaqoob Yousef Alattar Alawadhi", "Ali Majed Hamad Jaber Alsuwaidi", "Ammar Ahmad Mohammad Musallam Dahir", "Arhama Salem Ali Arhama Alshamsi", "Fahad Saeed Abdulla Abdulrahman Al Saeedi", "Ghaith Humaid Abdulwahhab Abdulla Al Awadhi", "Hamad Abdulla Nooh Alqashiri Almahri", "Hamad Jasem Salem Madhoosh Alshamsi", "Hamad Mansoor Sultan Mohammed Almemari", "Hamdan Ahmed Hasan Ali Almansoori", "Hamdan Jamal Mohamed Ali Aldhuhoori", "Humaid Ali Mohamed Ali Alobeidli", "Khalid Waleed Mohammed Ibrahim Alhosani", "Khalifa Humaid Yousef Allouh Alketbi", "Matar Abdelaziz Mufrah Matar Almesafri", "Mohamed Ali Mohamed Khalfan Aldahmani", "Mohamed Saif Mohamed Matar Almesafri", "Mohammad Eyad Mohammad Musalam Dahir", "Omair Adil Mousa Mohamed Alraeesi", "Omar Tariq Ahmad Mohamed Alhammadi", "Rashed Eissa Abdulla Juma Aldosari", "Rashed Taleb Hassan Ibrahim Mohamad", "Salem Saif Hassan Alshaer Alaleeli", "Yousef Yaqoob Ishaq Nolzam Al Balooshi", "Zayed Abdulla Mohammedazeem Maksi"], "GR-7 - D": ["Abdelrahman I S Aljerjawi", "Abdulla Rashed Ghanem Rashed Alsuwaidi", "Ahmed Bader Ahmed Boharoon Al Ali", "Ahmed Khaled Juma Buddah Alawadhi", "Ali Ibrahim Ahmed Mohammed Alhosani", "Eyas Basel Khaled", "Ibrahim Mohammed Naji Ahmed Al Bahal", "Khaled Khalfan Humaid Alrezzi Alshamsi", "Khalifa Abdulla Moosa Alhooti Alblooshi", "khalifa Bader Saed Daheq Alseqetri", "Mohamed Abdulla Mohamed Alqarraah Alnuaimi", "Mohammed Abdulla Amin Kiko Alzarooni", "Mohammed Aziz Naji Al Bahal", "Mohammed Khaled Mohammed Ismaeil Alraeesi", "Mohammed Nasser Abdulla Juma Aldhaheri", "Mohammed Saeed Khalifa Alshaali Alaleeli", "Obaid Saeed Obaid Saeed Alshamsi", "Omar Abdulaziz Abdulla Saleh Alhajeri", "Omar Abdulla Zakareyya Darbool Alshehhi", "Saeed Khaled Humaid Hamad Alshamsi", "Salem Abdulla Salem Ahmed Almahri", "Salem Ahmed Salem Ahmed Almahri", "Sam Saad", "Sanad Tareq Mahmoud Alrababah", "Sultan Khaled Mohammed Hassan Alabdouli", "Sultan Mohamed Abdulla Mohamed Alfarsi", "Zayed Eissa Hussain Yasin Alhammadi", "Zayed Hassan Ahmed Yousef Alraeesi", "Zayed Obaid Salim Obaid Almemari", "Zayed Yousif Saif Salem Alaryani"], "GR-8 - A": ["Abdulla Humaid Abdulla Mohammed Alraeesi", "Abdulla Mohammed Khamis Obaid Alband", "Abdulrahman Ahmed Yousuf Abdulrahim Alhosani", "Adam Nabil Galal Fahmi Ibrahim Galal", "Ahmed Ali Yousef Yaqoob Alhosani", "Ahmed Yaser Abdulqader Hassan Alawadhi", "Ali Fadhel Makloof Makloof", "Dalyn Diljoy Rebello Diljoy John Rebello", "Essa Mohammad Essa Ali Alshamsi", "Essa Saif Abdulla Rashed Almatrooshi", "Ghaith Fahad Abdulrahman Mohamad Almarzooqi", "Hamad Mohammed Obaid Mohammed Almatrooshi", "Hamdan Mejbel Sultan", "Hassan Abdulla Rashed Majed Alefari", "Humaid Mohammed Abdulla Hassan Alhosani", "Maktoom Adnan Ahmed Abdulrahman Almansoori", "Mayed Abdulla Mubarak Merdas Alshamsi", "Mohamed Jamal Mohamed Ali Aldhuhoori", "Mohammad Saeed Obaid Ali Alkhateri", "Muhammad Aazan Hussain Manan Qamar", "Omar Wael Nazieh Darweesh", "Omar Waleed Abdulfattah Mohamed Naif", "Rashed Abdulla Masood Ali Aldhaheri", "Saif Ali Rahmani"], "GR-8 - B": ["Abdulla Humaid Abdulla Rashed Almatrooshi", "Abdulla Sultan Abdulla Sheker Alblooshi", "Ahmad Mahmood Abdulla Abdulrahman Mahmood", "Ahmed Mohammed Kareem Moosa Alblooshi", "Ali Abdulqader Ebrahim Ali Mohamed", "Ali Khalfan Saif Obaid Binbader Alnuaimi", "Hamdan Khaled Abdulkarim Alajmani Alblooki", "Khalifa Anas Abdulwahab Murad Alraeesi", "Khalifah Abdulaziz Khalifah Aljahoori", "Majd Mohamed Ahmad Sabaneh", "Mansoor Khaled Ahmed Ali Alshehhi", "Mayed Ahmed Khalifa Bintouq Almheiri", "Mohamad Hasan Mohamed Hasan Mohamed Ebrahim", "Mohamad Issa Mohamad Hassan Abdulla", "Mohamed Eisa Hassan Haji Alhosani", "Omair Saeed Ibrahim Mohamed Almulla", "Omran Moosa Ali Binshaker Alblooshi", "Rian Mubarak Ahmed Bin Damnan", "Saeed Khalid Khalifa Ghashab Alshamsi", "Saif Abdalla Rashid Salim Alshamsi", "Shaikh Abdulaziz Bin Abdulla Bin Ali Bin Rahed", "Shaikh Abdulaziz Bin Rashed Bin Hamdan Bin Rashed Alnuaimi", "Sultan Abdullah Ali Hassan Ahli", "Sultan Salman Mohamed Abdulrahman Alblooshi", "Theyab Salim Khalifa Dalmouk Alktebi", "Zayed Abdulla Ibrahim Hassan Al Mandoos", "Zayed Khalifa Mohammed Alhouti Alblooshi"], "GR-8 - C": ["Abdelrahman Mohamed Sultan Mohamed Alowais", "Abdulla Yousuf Humaid Nasser Alhosani", "Ahmad Humaid Rashed Ahmad Lootah", "Ahmad Rashed Obaid Allouh Alktebi", "Dhyabb Mohmoud Khalil Alshaer", "Eisa Ahmed Mohamed Abdulla Alkamali", "Faisal T M Abuthabet", "Hamad Ahmad Ghalib Mohammed Ali", "Hamad Khaled Humaid Hamad Alshamsi", "Hamdan Abdulaziz Salem Abdulla Alaboodi Alteneiji", "Hamed Abdulrahman Salem Trais Al Qeemzi", "Humaid Abdulla Mohammed Khalfan Alghafli", "Humaid Abdulla Sultan Hamad Al Shamsi", "Juma Ahmed Juma Obaid Almatrooshi", "Khaled Mohammad Yousefi", "Khalid Waleed Mohammed Rashed Alshehhi", "Khalifa Khaled Khalifa Binaskoor Alsuwaidi", "Mansoor Yousef Abdulaziz Alajmani Alblooki", "Mansor Saif Musabbeh Abdulla Al Kaabi", "Mohammed Abdulla Nooh Khamis Almahri", "Mohammed Hamza Ahmed Safar Alblooshi", "Obaid Mohammed Ali Obaid Almatrooshi", "Salem Abdulla Salem Saeed Almadhaani", "Salem Saud Salem Taryam Alshamsi", "Sultan Omran Hassan Ibrahim Alhosani", "Sultan Saif Mubarak Aldabah Alketbi"], "GR-8 - D": ["Abdulaziz Salim Khalfan Salim Al Jabri", "Abdulla Khalifa Hassan Binghelaita Alghfeli", "Ali Eissa Ali Altayar Alshuweihi", "Eyad Ezzaldeen Fathi Ibrahim", "Fares Jassem Mohamad Sharif Mohamed Aljasmi", "Hamdan Ahmed Mohammed Ahmed Alhosani", "Hamdan Ibrahim Mohammed Ali Alshehhi", "Hamdan Khaled Hassan Ali Aldhuhoori", "Khalid Adel Ali Mohamed Alhashmi", "MOHAMED AHMED MOHAMED AHMED AHMED SAAD", "Mohammed Ammar Mohammed Abdulrazzaq Alawadhi", "Mohammed Nasser Rashed Obaid Almatrooshi", "Nawaf Abdulla Mohammed Abdul Rahman Al Zarouni", "Rashed Abdulla Mohammed Rashed Al Mukhaini", "Rashid Taha Abdulla Ali Sayood Alshehhi", "Saif Ahmed Saif Salem Alaryani", "Saif Mohammed Ahmed Binomair Almheiri", "Saif W J Alalami", "Saleh Ibrahim Ali Zaid Alshehhi", "Salem Obaid Ismaeil Mohammed Alshamsi", "Sheikh Saeed Bin Ahmed Bin Hamdan Bin Rashid Alnuaimi", "Sultan Khalid Mohamed Asfandyar Abdelrahim", "Sultan Muhammad Ali Albalooshi", "Zayed Hassan Abbas Almandoos Alblooshi", "Zayed Sultan Salah Addin Abdulrazzaq Mogalli"], "GR-9 - A": ["Abdulla Khaled Sultan Mohammed Almemari", "Ahmed Ali Hamad Jaber Alsuwaidi", "Ahmed Khaled Abdulrahman Mohammed Alhosani", "Ailan Khalifa Mohammed Khalifa Alshehhi", "Ammar Abdulla Hassan Mohammed Almandoos", "Bader Mohammad Abdul Hamid Ghunaim", "Bader Suleiman Sleyyum Al Abrawy", "Faiq Ahmed Ahmed Usman", "Faisal Mohammed Seid", "Hamad Mohammed Saleh Al Mandoos Alblooshi", "Ibrahim Thamer Ibrahim Ismaeil Alraeesi", "Iyad Osama Refaat Ahmed Moussa", "Juma Khaled Juma Buddah Alawadhi", "Khaled Abdulrahman Salem Trees Alqemzi", "Majed Humaid Abdulwahhab Abdulla Alawadhi", "Mohamed Farouk Matameer", "Mohammad Abdulla Murad Almandoos Alblooshi", "Mohammed Ahmad Odeh Farajallah", "Omar Ali Mohamad Abdalla Taher", "Omar Awad Saleh Awadallah Basha", "Omar Ibrahim Ahmed Mohammed Alhosani", "Omar Khaled Mohammed Hassan Alabdouli", "Seyed Arshia Seyed Mokhtar Hosseini", "Sheikh Hamdan Bin Rashed Bin Hamdan Bin Rashed Alnuaimi", "Sultan Abdulkarim Shaikh Muhammad", "Zayed Abdulla Abdulrahman Mohammed Alraeesi"], "GR-9 - B": ["Abdulaziz Saqer Abdulla Abdulrahman Alnuaimi", "Abdulla Ali Abdulla Al Mandoos Alblooshi", "Ahmed Moataz Ahmed Elberns Metwally Abdelnaby", "Ali Ahmed Hassan Alfoorah Alshamsi", "Eisa Humaid Salem Maqlazi Alsharqi", "Faris Mohammed Ahmed Mohammed Alshamsi", "Hamad Abdulrahman Hassan Mohamad Gharib", "Hamad Humaid Zaal Khalfa Ali Alremithi", "Humaid Obaid Khalfan Bintaryam Alshamsi", "Khalaf Salman Ibrahim Ali Almarzooqi", "Khalid Ali Hassan Mohammed Alraeesi", "Khalifa Khaled Salem Ahmed Alhammadi", "Majid Omar Hassan Khalaf Esmail", "Mohamed Rashid Abdalla Mohamed Alnaqbi", "Mohammed Abdulla Jasim Ahmed Almansoori", "Mohammed Ahmed Hasan Ali Almansoori", "Omar Ahmed Ali Salem Alblooshi", "Saeed Azzan Saeed Juma Alsuwaidi", "Saeed Eissa Saeed Eissa Alshehhi", "Saif Rashed Ali Mohammed Alshehhi", "Salem Khalifa Saeed Binghulaita Alghfeli", "Saud Moosa Mohammed Almandoos Alblooshi", "Theyab Humaid Ahmed Mohammed Alblooshi", "THEYAB OBAID SAIF OBAID ALMATROOSHI", "Zayed Abdulla Saif Obaid Almatrooshi", "Zayed Ali Saeed Ali Alsuwaidi", "Zayed Hassan Mohammed Abdulla Almarzooqi"], "GR-9 - C": ["ABDUL JABBAR AJMI SALIM SHAABAN", "Abdulaziz Suliman Abdulla Suliman Alshehhi", "Abdulla Mohamed Sultan Mohamed Alowais", "Abdulla Mohammed Khalfan Bintaryam Alshamsi", "Ali Sultan Ali Obaid Ahmed", "Hamdan Jasem Dormohammed Mohammed Dad", "Humaid Khaled Obaid Esmaeel Almazrouei", "Ibrahim Mohamed Ibrahim Mohamed Ali Elbawab", "Jamal Basel Khaled", "Kenan Samer Saleh Ayyoub", "Khalifa Mohammed Hassan Rashed Alhosani", "Mayed Abdulla Mohamed Aldabit Alnaqbi", "Mohamed Ali Hassan Khalaf Esmail", "Mohammad Nashat Younis Abdelrahman", "Mohammed Hassan Ahmed Yousef Alraeesi", "Mohammed Jasem Mohammed Sultan Alajmani", "Obaid Mohammed Ahmed Humaid Bindrwesh ALSUWAIDI", "Omar Ahmed Meeran Rahmah Alraeesi", "Omar Ali Khalil Mirza Alhosani", "Omar Fadil Mohamed Hassan Robari", "Rashed Ahmed Meeran Rahmah Alraeesi", "Saif Abdullah Ramadhan Hussein Abdullah", "Saleh Easa Ahmed Ali Alseqetri", "Saoud Mohammed Abdulwahab Abdulla Alawadhi", "Sheikh Nasser Bin Ahmed Bin Nasser Bin Rashid Alnuaimi", "Sultan Ahmed Humaid Yousef Alnuaimi", "Yousef Mohammed Yousef Nasser Alnuaimi"], "GR-9 - D": ["Abdulla Mansoor Hassan Ali Alblooshi", "ABDULLAH MOHAMED AHMAD SALEH JAMAL", "Ahmed Ali Ahmed Buseem Alawadhi", "Ahmed Emad Mohamed Abdelkhalek", "Ahmed Mohammed Ishaq Abdulghffar Alkhajeh", "Ali Rashed Ali Rashed Alshehhi", "Hamdan Nabeel Nabeel", "Hamed Ghaleb Mohammed Taher Alblooshi", "Hamza Yousef Al Haj Bakkar", "Hassan Yousef Hassan Zaid Alshehhi", "KHALAF MOHAMMED KHALAF HAMAD ALSHAMSI", "Maktoom Mubarak Ali Ibrahim Bintuwaih", "Mayed Eissa Hassan Ali Alblooshi", "Mohammad Saif Mohammad Binghulaita Alghafli", "Mubarak Mohamed Mubarak Masaud Alketbi", "Omar Abdulla Thani Abuzayed Almesmari", "Omar Khalifa Ahmed Yousuf", "Omar Said Abdalla Abdou Shalby", "Rashed Adam Murad Hasan Alblooshi", "Rashid Falah Rashid Bin Falah Al-Ali", "Saeed Abdulla Mohammed Khalifa Alsaeedi", "Saeed Rashid Hassan Rashid Aldhuhoori", "Saif Mohammed Ahmed Shames Mohammed Alawadhi", "Saif Sultan Obaid Bintarrooq Alnuaimi", "Yahya Ait El Fakir", "Yousef Humaid Mohammed Aldhaheri"], "GR-10 - A": ["Abdulla Omar Abdulrahman Salem Abdulla Ali Alnuaimi", "Abdullah Shaikh Waseem Akhtar", "Ahmed Hassan Mahmood Balochi", "Ali Nabil Galal Fahmi Ibrahim Galal", "Hamad Ahmad Fard", "Hamad Mahmood Hassan Mahmood Alhosani", "Hassan Obaid Hassan Humaid Alhajeri", "Khalfan Nasser Obaid Abdulla Tahwara Almheiri", "Khalifa Khalid Khalifa Obiad Alshamsi", "Khalifa Mayed Ahmed Adbool Alawadhi", "Layth Younes", "Majed Saif Abdulla Rashed Almatrooshi", "Mhd Saeed Moataz Hachem", "Mohamed Younis Abdelrahman Hawwai Alzarooni", "Mohammad Harib Sultan Bin Harib Almheiri", "Mohammad Wael Nazieh Darweesh", "Mohammed Ahsan Fiaz Ahmad", "Mohammed Ali Sattar Obayes Alzwghaibi", "Muhammad Zohan Khan Muhammad Fuzail", "Nasser Jubran Nasser Bin Jubran Al Suwaidi", "Omar Anas Menla", "Saif Ahmed Rashed Shattaf Almatrooshi", "Saqer Saeed Hassan Ali Alblooshi", "Talal Abdulrahim Amin Kaikho Alzarooni", "Yosef Mahmoud Abdullah Mahmoud Badwan"], "GR-10 - B": ["Abdulaziz Rashed Khalfan Alshaali", "Abdulla Mohammed Abdulla Mohammed Aleghfeli", "Abdulla Saif Mubarak Al Ketebi", "Ali Saqer Ali Humaid Alshamsi", "Eisa Musabeh Mohammed Khalfan Alghfeli", "Faisal Ahmed Binharib Almheiri", "Hadef Ahmed Mohammed Ahmed Almarzooqi", "Humaid Ali Humaid Bueissa Alshamsi", "Khaled Nasser Rashed Shattaf Almatrooshi", "Khalifa Eisa Khalifa Binharib Almheiri", "Khalifa Majed Ali Abdulla Alraeesi", "Majid Mohamed Ahmed Alsouqi Al-Ali", "Mansoor Abdulla Salem Saeed Almadhaani", "Marwan Waleed Mohammed Abdulla Alhosani", "Mohammed Moataz Hussain Mohammed Bahatem", "Mohammed Sinan Abdulhaq Alkattan", "Musbah M K Abusafia", "Naser Saeed Mohammed Abood Alkaabi", "Obaid Nasser Ali Humaid Almatrooshi", "Omar Ahmed Humaid Abdulla Alhosani", "Rakan Mohammed Al Sadi", "Rashed Abdulla Humaid Saif Almheiri", "Rashed Nasser Rashed Shattaf Almatrooshi", "Rashed Yousif Rashid Ali Bin Hussain Alshamsi", "Rashid Abdulrahman Majid Bin Darwish Alali", "Sultan Ahmed Mohammed Mohammed Alawadhi", "Sultan Mohamed Sultan Mohamed Alowais", "Sultan Saeed Khamis Saeed Alsaadi", "Yousef Saeed Yousef Khalifa Alsaeedi"], "GR-10 - C": ["Abdul Aziz Abdulla Ahmed Ali Almarzooqi", "Abdul Wahab Amin Al Sattouf", "Abdulla Salem Abdulla Ghulaita Alghafli", "Abdulrahman Omran Abdulrahman Ishaq Mohammed", "Ahmed Naser Ahmed Zain Fadhel", "Ali Sulaiman Moosa Khadem Aldhaheri", "Ammar Abdolmajid Rahimi", "Fayiaz Majid Obaid Thani Alshamsi", "Hazaa Abdulla Khalfan Bin Falah Al Ali", "Humaid Abdulla Mohammed Abdulla Alsaeedi", "Hussain Mohamed Hussain Ahmed Alhammadi", "Ibrahim Ahmed Ibrahim Murad Almaazmi", "Khalifa Humaid Khalifa Bintouq Almheiri", "Mayed Mohammed Shahdad Eissa Alblooshi", "Mohamed Abdelnasser Mohamed Saleh Nassar", "MOHAMED EMAD RADI MOHAMED MOHAMED ELTARABANY", "Mohammed Majed Mohammed Rashed Almughanni Alshamsi", "Omar Abdulla Moosa Mohammed Alhooti", "Omar Ali Hassan Mohammed Alraeesi", "Rashed Ahmed Rashed Khalfan Alkaabi", "Rashed Mohammed Ahmed Humaid Bindarwish Alsuwaidi", "Saif Hamad Salim Binsuwaif Alktebi", "Saif Ibrahim Mohamad Shah Murad Ali", "Saif Rashed Ali Rashed Aldhuhoori", "Sultan Mubarak Khalfan Mubarak Khalfan Almheiri", "Suod Abdulla Abdulmuhsen Ahmed Alnuaimi"], "GR-11 - A": ["Abdul Rahman Mohammed Nabel Altabaqchali", "Abdulla Dawood Mohammed Rashed Alshehhi", "Abdullah Mubarak Hasan Al Khulaqi", "Ammar Tufail Muhammad Tufail", "Anas Ahmed Mahmoud Ahmed Seddik Taha", "Fares Pirbakhsh Nosrati", "Hamza Rami Ahmed Moamar", "Hassan Ahmed AlSayedemad Ahmed Mohammed", "Ibrahim Faisal Abduk", "Ibrahim Hazim A Al Hajar", "Khalfan Abdulla Khalfan AlShaiba AlNuaimi", "Khalifa Fahad Khalifa Saadalla Almeihri", "Mohamed Wael Mohamed Mostafa Hafez Momen", "Mohammad Abdel Fattah M Al Ghuleeh", "Mohammad Abdol Vahab Farhadi", "Mohammad Abubakar Mubarak Mubarak Ali Malik", "Muhammad Umar Qureshi Muhammad Atif Qureshi", "Natheer Mourchid", "Noureldin Mohamed Ramadan Basyouny Aly Eldib", "Obay Salah Mahd Al Azzawi", "Omar Aldalu", "Omar Faez Badr Mohammed", "Yousef Mahmoud Elsayed Ahemd Elhegawy", "Yousuf Hazim A Al Hajar", "Zayed Abdulla Mubarak Merdas ALSHamsi", "Zeyad Haitham Mohamed Ibrahim Deraz"], "GR-11 - B": ["Abdulla Ahmed Abdulla Alajmani Alblooki", "Ahmed Noureldin Mohamed Mohamed Mohamed Noureldin", "Ali Abdulla Saif Binsulaiman Alshamsi", "Amin Zaeim Rahimi Holori", "Anas Marwan Waleed Alzubaidi", "Fahad Hussain Mueen Malalla AlHosani", "faisal Mamdouh B AlHarby", "Fares Mohamed Jasim Yaseen Alhosani", "Hamdan Hazza Thani Fayrooz Obaid", "Hamdan Yousuf Ahmed Sultan Al Ajmani", "Hamid Abdulla Ahmed Ali Alsaadi", "Humaid Ahmed Humaid Yousef Alnuaimi", "Khaled Aziz Naji Al Bahal", "Masood Abdulla Masood Ali Aldhaheri", "Mohamed Marwan Mohamed Rafea Almarzooqi", "Mohammed Abdulla Mohammed Hamad Almahri", "Obaid Ali Saeed Ali Alsuwaidi", "Omar Khaled Mohammed Saeed Alzaabi", "Othman Belhcen", "Rashed AbdulAziz R.Shattaf Al Matrooshi", "Saeed Ali Mohammed AlShaer AlAwadhi", "Saeed Mohammad Saeed Hathboor Alremeithi", "Soud Jabbar Gholam Mohamad Abdallah", "Suhail Ali Hamad Suhail Aldahmani", "Sultan Gamal Salah Addin Abdulrazzaq Mogalli", "Yasen Mohamed Elsayed Abdelkhalek Aly", "Zeyad Mohamed Ahmed Abdulla Hafez"], "GR-11 - C": ["Abdalla Younis Mousa A K Alblooshi", "Abdelrahman Abdulla Ahmed Ali AlMarzooqi", "Abdollah Adel Hamidi", "Abdulla Nasser Abdulla Altayyar Alshuweihi", "Ahmed Khaled Mahmood Gargash Alawadhi", "Ahmed Nasser Abdulla Altayyar Alshuweihi", "Ammar Abdulhamid Ali Rustom AlRaeesi", "Essa Khalil Bassol Sanqoor", "Hamad Majed Mohammed Abdulla Alsaeedi", "Hamad Rashed Obaid Allouh Alketbi", "Hamdan Hassan Abdulla Al Mandoos Alblooshi", "Hamdan Humaid Abdulla Ibrahim Alshaer", "Hazza Omar Ali Saeed AlMadhaani", "Humaid Mohammed Ahmed Binomair Almheiri", "Humaid Sultan Ali Alshaiba Alnuaimi", "Mohammed Abdulla Moosa Khadem AlDhaheri", "Mohammed Yahya M. Alhouti Alblooshi", "Obaid Majed Sultan Lehlaiw ALMAtrooshi", "Rashed Eissa Salem Eissa Alseqetri", "Rashed Khaled Ahmed Hassan AlRaeesi", "Saeid Esmaeil Falahi", "Saif Ibrahim Ahmed Binhaji AlYassi", "Saif Mohammed Saif Khalfan Almatrooshi", "Salim I S Aljerjawi", "Sultan Talib Hassan Ibrahim M Abdulla", "Zayed Jassem Mohamad Sharif Mohamed Aljasmi"], "GR-12 - A": ["Abdulla Mohamed Abdulla Ahmed Hayayei", "Abdulla Saad Hamad Marei Alseqetri", "Abdulla Saud Salem Taryam AlShamsi", "Ahmad Younes", "Ali Mohammed Abdulla Yousef Alshamsi", "Fares Ahmed Mohammed Ahmed Almarzooqi", "Gaith Abdulqader Yahya Mohamad", "Hadef Eissa Ahmed Binhazeem AlSuwaidi", "Hamad Hussein Fayrooz Alkamali", "Hamed Mohamed Ahmed Shams AlAwadhi", "Mansoor Mohammed Khalaf Hamad AlShamsi", "Mansour Hussein Ibrahim Ahmad", "Mayed Yehya Ibrahim Ahmed Almarri", "Mohamed Osama Mohamed Nour Ahmed Shehata", "Mohamed Khameis Mohamed O.A.AlAbdouli", "Mohamed Osama Refaat Ahmed", "Mohamed Yamen Mohamed Atia Radwan", "Mohammed Hussain Fiaz Ahmad", "Mohammed Rashed Ali Mohammed Alshehhi", "Muhammad Fahad Muhammad Faisal Ismail", "Mustafa Sattar Obayes Alzwghaibi", "Nebras Sahel Majed Alrousan", "Nikita Yerofieiev", "Rashed Salman Rashed Juma Salem", "Rashid Ahmed Mubarak Ismaeil Al Jnaibi", "Saif Salah Al Din Shahadad Al Balushi", "Salaheldin Maged Wahba", "Sultan Mohammed Saeed Mohammed AlDerei", "Sultan Saqer Mohammed Abdulla AlMulla"], "GR-12 - B": ["Abdulalrahman Yasser Rushdi Ali", "Abdulla Ali Salem Ali Alqaiwani", "Abdulla Saif Abdulla R.AlMatrooshi", "Abdulla Sulaiman Ali Yousuf AlDhaheri", "Abdullah Marwan Waleed Alzubaidi", "Abdulrahman Mojeeb Abdulwahab Hazaa Abdulla", "Ahmed Saleh Ahmed Saeed AlDhaheri", "Ali Farouk Matameer", "Ameen M Anas Abdulaal", "Ayham Ibrahim S Abu Saleh", "Falah Ahmed Saeed Binharib AlMheiri", "Ghaith Yousef Sultan Binbakheet Almatrooshi", "Hamad Abdulla Moosa Mohammed Alhooti", "Hamad Yousef Hassan Zaid Alshehhi", "Hamdan Abdulla Ibrahim Obaid Alkaabi", "Hamdan Hussain Ali Mohammed AlHosani", "Hamza Munir Abdullah Al Mohammed", "Humaid Abdulla Amin K. Alzarooni", "Mansoor Abdulla Hassan Mohammed AlHouli", "Mohammed Essam Mohammed Khalifa Alkaabi", "Mohammed Khaled Mohammed Hassan Alabdouli", "Mohammed Musabeh Khalfan Matar Alkaabi", "Naif Faisal Ali Alhraizi Almahri", "Omar Ali Saeed Ali Alsuwaidi", "Rashed Majed AbdulWahed H.AlBlooki", "Saeed Mohammed Saeed Mohammed ALGhumlasi", "Saltan Rashed Ali Rashed Aldhuhoori", "Zayed Ali Salem Khudoom AlKaabi"]};
+const ORDER = Object.keys(DATA);
+const GRADES = [...new Set(ORDER.map(k => k.match(/GR-(\d+)/)[1]))];
+const KEY = 'fa-boys-election-v1';
+const COLORS = ['#0b6e4f','#1d5fa8','#8a3ffc','#c8102e','#b35c00','#00798c','#6b4f9e','#2e7d32','#ad1457','#455a64'];
+
+let state = load();
+let view = {page:'home', sec:null, tab:'cands', grade:'all', q:''};
+let lastCount = null;
+const classLock = new URLSearchParams(location.search).get('class');
+const lockedSection = classLock && DATA[classLock] ? classLock : null;
+function restrictedTo(sec){ return !lockedSection || sec === lockedSection; }
+function classLink(sec){ return location.pathname + '?class=' + encodeURIComponent(sec); }
+
+function load(){
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.sections) return s; } catch(e){}
+  return {title:'Class Representative Election 2026–27', sections:{}, requireName:true};
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+function S(k){ return state.sections[k] || (state.sections[k] = {cands:[], votes:{}, voted:[], closed:false}); }
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function initials(n){ const p = n.replace(/[()]/g,'').split(/\s+/).filter(Boolean); return ((p[0]||'')[0] + ((p[1]||'')[0]||'')).toUpperCase(); }
+function short(n){ const p = n.split(/\s+/); return p.length > 3 ? p.slice(0,3).join(' ') : n; }
+function color(i){ return COLORS[i % COLORS.length]; }
+function av(name, i){ return `<span class="av" style="background:${color(i)}">${esc(initials(name))}</span>`; }
+function total(k){ const s = S(k); return s.cands.reduce((a,c) => a + (s.votes[c]||0), 0); }
+function ranked(k){ const s = S(k); return s.cands.map(c => ({i:c, name:DATA[k][c], v:s.votes[c]||0})).sort((a,b) => b.v - a.v); }
+function winnerOf(k){
+  const r = ranked(k); if (!r.length || !r[0].v) return null;
+  const top = r.filter(x => x.v === r[0].v);
+  return top.length > 1 ? {tie:true, names:top.map(x=>x.name), v:r[0].v} : {tie:false, name:r[0].name, v:r[0].v};
+}
+function status(k){ const s = S(k); if (s.closed) return ['done','Closed']; if (total(k) > 0) return ['live','Voting']; if (s.cands.length) return ['live','Ready']; return ['','Not started']; }
+function toast(m){ const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 1600); }
+function modal(html){ const m = document.getElementById('modal'); document.getElementById('modalBox').innerHTML = html; m.classList.add('show'); }
+function closeModal(){ document.getElementById('modal').classList.remove('show'); }
+function confirmBox(title, text, okLabel, fn, danger){
+  modal(`<h3>${title}</h3><p class="note">${text}</p><div class="row" style="justify-content:center;margin-top:16px">
+    <button class="btn" onclick="closeModal()">Cancel</button>
+    <button class="btn primary" id="okBtn" style="${danger?'background:var(--accent);border-color:var(--accent)':''}">${okLabel}</button></div>`);
+  document.getElementById('okBtn').onclick = () => { closeModal(); fn(); };
+}
+
+function go(page, sec, tab){
+  if (lockedSection && page === 'summary') { toast('Results are available to the teacher only'); return; }
+  if (sec && !restrictedTo(sec)) { toast('This device is locked to ' + lockedSection); return; }
+  view.page = page; if (sec) view.sec = sec; if (tab) view.tab = tab; view.q = '';
+  render(); window.scrollTo(0,0);
+}
+function startStudentVoting(sec){
+  const s = S(sec);
+  if (!s.cands.length){ toast('Candidates must be selected first'); go('sec', sec, 'cands'); return; }
+  if (s.closed){ toast('Voting is closed for this section'); return; }
+  view.sec = sec; openKiosk();
+}
+
+/* ---------- Home ---------- */
+function renderHome(){
+  const list = lockedSection ? [lockedSection] : ORDER.filter(k => view.grade === 'all' || k.startsWith('GR-'+view.grade+' '));
+  return `
+  <div class="row"><h2>${lockedSection ? 'Your class voting' : 'Choose a class section'}</h2><span class="spacer"></span>
+    <span class="meta">${lockedSection ? lockedSection : ORDER.length + ' sections · ' + ORDER.reduce((a,k)=>a+DATA[k].length,0) + ' students'}</span></div>
+  <div class="card quick-start">
+    <h3>${lockedSection ? '🔒 ' + lockedSection + ' — class locked' : 'Fast student voting'}</h3>
+    <div class="note">${lockedSection ? 'This link is restricted to this class. Students can see only their own roster and can vote only once.' : 'For a supervised classroom election: choose the section, identify the student, select one candidate, and confirm.'}</div>
+    <div class="steps"><div class="step"><b>1</b><span>${lockedSection ? 'Find your name' : 'Choose the student’s section'}</span></div><div class="step"><b>2</b><span>${lockedSection ? 'Choose one candidate' : 'Find the student’s name'}</span></div><div class="step"><b>3</b><span>Confirm one vote</span></div></div>
+  </div>
+  ${lockedSection ? '' : `<div class="chips">
+    <button class="chip ${view.grade==='all'?'on':''}" onclick="view.grade='all';render()">All grades</button>
+    ${GRADES.map(g => `<button class="chip ${view.grade===g?'on':''}" onclick="view.grade='${g}';render()">Grade ${g}</button>`).join('')}
+  </div>`}
+  <div class="grid">
+  ${list.map(k => { const s = S(k), [cls,txt] = status(k), w = winnerOf(k);
+    return `<button class="sec-card" onclick="go('sec','${k}','${s.cands.length?'vote':'cands'}')">
+      <div class="row"><h3>${k}</h3><span class="spacer"></span><span class="badge ${cls}">${txt}</span></div>
+      <div class="meta">${DATA[k].length} students · ${s.cands.length} candidates · ${total(k)} votes</div>
+      ${w ? `<div class="win">🏆 ${w.tie ? 'Tie ('+w.names.length+')' : esc(short(w.name))} — ${w.v}</div>` : ''}
+      <span class="btn primary start" onclick="event.stopPropagation();startStudentVoting('${k}')">▶ Start student voting</span>
+      ${!lockedSection ? `<span class="class-link" onclick="event.stopPropagation();copyClassLink('${k}')">🔗 Copy locked ${esc(k)} link</span>` : ''}
+    </button>`; }).join('')}
+  </div>`;
+}
+
+/* ---------- Section ---------- */
+function renderSec(){
+  const k = view.sec, s = S(k), [cls,txt] = status(k);
+  const tabs = [['cands','1 · Candidates'],['vote','2 · Device voting'],['count','2 · Count paper ballots'],['results','3 · Results']];
+  let body = '';
+  if (view.tab === 'cands') body = renderCands(k, s);
+  if (view.tab === 'vote') body = renderVote(k, s);
+  if (view.tab === 'count') body = renderCount(k, s);
+  if (view.tab === 'results') body = renderResults(k, s);
+  return `
+  <div class="row no-print"><button class="btn" onclick="go('home')">← Back</button>
+    <h2>${k}</h2><span class="badge ${cls}">${txt}</span><span class="spacer"></span>
+    <span class="meta">${DATA[k].length} students</span></div>
+  <div class="tabs">${tabs.map(([id,l]) => `<button class="tab ${view.tab===id?'on':''}" onclick="view.tab='${id}';render()">${l}</button>`).join('')}</div>
+  ${body}`;
+}
+
+function renderCands(k, s){
+  const locked = total(k) > 0;
+  return `
+  <div class="card panel">
+    <div class="row"><b>Select the candidates (${s.cands.length})</b><span class="spacer"></span>
+      ${s.cands.length ? `<button class="btn" onclick="clearCands()" ${locked?'disabled':''}>Clear</button>` : ''}
+      <button class="btn primary" onclick="go('sec',null,'vote')" ${s.cands.length<1?'disabled':''}>Next: start voting →</button></div>
+    <p class="note" style="margin:6px 0 0">${locked ? '🔒 Votes have already been cast — reset votes in Results to change candidates.' : 'Tap students who are running for class representative.'}</p>
+    ${s.cands.length ? `<div class="chips" style="margin:12px 0 0">${s.cands.map(c=>`<span class="chip on">${esc(short(DATA[k][c]))}</span>`).join('')}</div>` : ''}
+  </div>
+  <input class="search" id="q" placeholder="🔍 Search student name…" value="${esc(view.q)}" oninput="view.q=this.value;drawList()">
+  <div class="slist" id="slist"></div>`;
+}
+function drawList(){
+  const k = view.sec, s = S(k), q = view.q.trim().toLowerCase(), locked = total(k) > 0;
+  const el = document.getElementById('slist'); if (!el) return;
+  el.innerHTML = DATA[k].map((n,i) => ({n,i})).filter(x => !q || x.n.toLowerCase().includes(q)).map(({n,i}) =>
+    `<button class="sitem ${s.cands.includes(i)?'on':''}" onclick="toggleCand(${i})" ${locked?'disabled':''}>${av(n,i)}<span>${esc(n)}</span><span class="check">✓</span></button>`
+  ).join('') || '<div class="empty">No match</div>';
+}
+function toggleCand(i){
+  const s = S(view.sec); if (total(view.sec) > 0) return;
+  s.cands = s.cands.includes(i) ? s.cands.filter(x => x !== i) : [...s.cands, i];
+  save(); const q = view.q; render(); const inp = document.getElementById('q'); if (inp && q) { inp.focus(); inp.setSelectionRange(q.length,q.length); }
+}
+function clearCands(){ S(view.sec).cands = []; save(); render(); }
+
+function renderVote(k, s){
+  if (!s.cands.length) return `<div class="card empty">Pick candidates first. <br><br><button class="btn primary" onclick="view.tab='cands';render()">Choose candidates</button></div>`;
+  const t = total(k), n = DATA[k].length, pct = Math.round(t / n * 100);
+  return `
+  <div class="card panel">
+    <b>Student voting mode</b>
+    <p class="note">Recommended flow: every student finds their own name, taps one candidate, and confirms. The screen resets automatically for the next student.</p>
+    <label class="toggle"><input type="checkbox" ${state.requireName?'checked':''} onchange="state.requireName=this.checked;save()">
+      Require each student to select their name (recommended — prevents voting twice)</label>
+    <div class="row" style="margin-top:16px">
+      <button class="btn primary" onclick="openKiosk()" ${s.closed?'disabled':''} style="padding:12px 20px">▶ Open voting screen</button>
+      ${s.closed ? '<span class="note">Voting is closed — reopen it in Results.</span>' : ''}
+    </div>
+  </div>
+  <div class="stats">
+    <div class="card stat"><span class="meta">Votes cast</span><b>${t}</b></div>
+    <div class="card stat"><span class="meta">Class size</span><b>${n}</b></div>
+    <div class="card stat"><span class="meta">Turnout</span><b>${pct}%</b></div>
+  </div>`;
+}
+
+function renderCount(k, s){
+  if (!s.cands.length) return `<div class="card empty">Pick candidates first. <br><br><button class="btn primary" onclick="view.tab='cands';render()">Choose candidates</button></div>`;
+  return `
+  <div class="card panel"><div class="row"><b>Count paper ballots</b><span class="spacer"></span>
+    <button class="btn" onclick="undoCount()" ${lastCount?'':'disabled'}>↶ Undo</button>
+    <span class="meta">Total: <b>${total(k)}</b></span></div>
+    <p class="note" style="margin:6px 0 0">Read each ballot and tap <b>+</b>. Keyboard: press <span class="key">1</span>–<span class="key">9</span> to add a vote.</p></div>
+  <div class="card">${s.cands.map((c,j) => `
+    <div class="tally">${av(DATA[k][c],c)}<span class="nm">${esc(DATA[k][c])} ${j<9?`<span class="key">${j+1}</span>`:''}</span>
+      <button class="pm" onclick="addVote(${c},-1)" ${s.closed?'disabled':''}>−</button>
+      <span class="cnt">${s.votes[c]||0}</span>
+      <button class="pm plus" onclick="addVote(${c},1)" ${s.closed?'disabled':''}>+</button></div>`).join('')}
+  </div>`;
+}
+function addVote(c, d){
+  const s = S(view.sec); if (s.closed) return;
+  const v = (s.votes[c]||0) + d; if (v < 0) return;
+  s.votes[c] = v; lastCount = d > 0 ? {sec:view.sec, c} : null; save(); render();
+}
+function undoCount(){ if (!lastCount) return; const s = S(lastCount.sec); s.votes[lastCount.c] = Math.max(0,(s.votes[lastCount.c]||0)-1); lastCount = null; save(); render(); toast('Last vote removed'); }
+
+function renderResults(k, s){
+  if (!s.cands.length) return `<div class="card empty">No candidates yet.</div>`;
+  const r = ranked(k), t = total(k), w = winnerOf(k), max = r[0].v || 1;
+  return `
+  ${w ? `<div class="winner"><div style="font-size:40px">🏆</div><div><div class="t">${w.tie?'Tie — revote needed':'Class representative'}</div>
+     <div class="n">${w.tie ? w.names.map(esc).join(' & ') : esc(w.name)}</div><div class="meta">${w.v} vote${w.v===1?'':'s'}${t?` · ${Math.round(w.v/t*100)}%`:''}</div></div></div>` : ''}
+  <div class="stats">
+    <div class="card stat"><span class="meta">Votes cast</span><b>${t}</b></div>
+    <div class="card stat"><span class="meta">Turnout</span><b>${Math.round(t/DATA[k].length*100)}%</b></div>
+    <div class="card stat"><span class="meta">Candidates</span><b>${s.cands.length}</b></div>
+  </div>
+  <div class="card panel">${r.map((x,j) => `
+    <div class="bar-row ${j===0&&x.v?'first':''}"><div class="bar-top"><span>${j+1}. ${esc(x.name)}</span><span>${x.v}${t?` · ${Math.round(x.v/t*100)}%`:''}</span></div>
+    <div class="bar"><i style="width:${x.v/max*100}%"></i></div></div>`).join('')}
+  </div>
+  <div class="row no-print">
+    <button class="btn primary" onclick="toggleClose()">${s.closed?'🔓 Reopen voting':'🔒 Close voting'}</button>
+    <button class="btn" onclick="window.print()">🖨 Print</button>
+    <button class="btn" onclick="exportCSV(['${k}'])">⬇ CSV</button>
+    <span class="spacer"></span>
+    <button class="btn danger" onclick="resetVotes()">Reset votes</button>
+  </div>`;
+}
+function toggleClose(){ const s = S(view.sec); s.closed = !s.closed; save(); render(); toast(s.closed?'Voting closed':'Voting reopened'); }
+function resetVotes(){ confirmBox('Reset votes?', `All votes for ${view.sec} will be deleted. Candidates stay.`, 'Reset', () => { const s = S(view.sec); s.votes = {}; s.voted = []; s.closed = false; save(); render(); toast('Votes reset'); }, true); }
+
+/* ---------- Summary ---------- */
+function renderSummary(){
+  const done = ORDER.filter(k => winnerOf(k));
+  return `
+  <div class="row"><h2>All results</h2><span class="spacer"></span>
+    <button class="btn" onclick="window.print()">🖨 Print</button>
+    <button class="btn" onclick="exportCSV(ORDER)">⬇ CSV (all)</button></div>
+  <p class="note">${done.length} of ${ORDER.length} sections have results.</p>
+  <div class="card" style="overflow-x:auto"><table>
+    <tr><th>Section</th><th>Class representative</th><th>Votes</th><th>Turnout</th><th>Status</th></tr>
+    ${ORDER.map(k => { const w = winnerOf(k), t = total(k), [cls,txt] = status(k);
+      return `<tr style="cursor:pointer" onclick="go('sec','${k}','results')"><td><b>${k}</b></td>
+        <td>${w ? (w.tie ? '⚠ Tie: '+w.names.map(n=>esc(short(n))).join(', ') : '🏆 '+esc(w.name)) : '<span class="meta">—</span>'}</td>
+        <td>${w?w.v:'—'}</td><td>${t?Math.round(t/DATA[k].length*100)+'%':'—'}</td><td><span class="badge ${cls}">${txt}</span></td></tr>`; }).join('')}
+  </table></div>
+  <div class="card panel no-print" style="margin-top:16px">
+    <b>Backup & transfer</b>
+    <p class="note">Results are saved in this browser only. Download a backup to move them to another device or keep a copy.</p>
+    <div class="row"><button class="btn" onclick="exportJSON()">⬇ Download backup</button>
+      <button class="btn" onclick="document.getElementById('importFile').click()">⬆ Restore backup</button>
+      <span class="spacer"></span><button class="btn danger" onclick="resetAll()">Reset everything</button></div>
+  </div>`;
+}
+function download(name, text, type){ const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text],{type})); a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
+function exportCSV(keys){
+  const rows = [['Section','Candidate','Votes','Percent','Rank','Winner']];
+  keys.forEach(k => { const t = total(k), w = winnerOf(k); ranked(k).forEach((x,j) => rows.push([k, x.name, x.v, t?Math.round(x.v/t*100)+'%':'0%', j+1, w && !w.tie && w.name===x.name ? 'YES' : ''])); });
+  download('election-results.csv', '﻿' + rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n'), 'text/csv');
+}
+function exportJSON(){ download('election-backup.json', JSON.stringify(state), 'application/json'); }
+document.getElementById('importFile').onchange = e => {
+  const f = e.target.files[0]; if (!f) return; const r = new FileReader();
+  r.onload = () => { try { const s = JSON.parse(r.result); if (!s.sections) throw 0; state = s; save(); render(); toast('Backup restored'); } catch(err){ toast('Not a valid backup file'); } };
+  r.readAsText(f); e.target.value = '';
+};
+function resetAll(){ confirmBox('Reset everything?', 'All candidates and votes in every section will be deleted.', 'Delete all', () => { state = {title:state.title, sections:{}, requireName:state.requireName}; save(); render(); toast('Everything reset'); }, true); }
+
+/* ---------- Kiosk ---------- */
+let kState = {step:'name', voter:null, q:''};
+function openKiosk(){
+  if (lockedSection && view.sec !== lockedSection) { toast('This device is locked to ' + lockedSection); return; }
+  kState = {step: (lockedSection || state.requireName) ? 'name' : 'vote', voter:null, q:''};
+  document.getElementById('kTitle').textContent = view.sec + ' · ' + state.title;
+  document.getElementById('kiosk').classList.add('show');
+  try { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); } catch(e){}
+  drawKiosk();
+}
+function closeKiosk(){
+  document.getElementById('kiosk').classList.remove('show');
+  try { document.fullscreenElement && document.exitFullscreen(); } catch(e){}
+  render();
+}
+function copyClassLink(sec){
+  const url = new URL(classLink(sec), location.href).href;
+  if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => toast('Locked link copied for ' + sec));
+  else { window.prompt('Copy this locked class link:', url); }
+}
+function drawKiosk(){
+  const k = view.sec, s = S(k), b = document.getElementById('kBody');
+  if (kState.step === 'name') {
+    const left = DATA[k].length - s.voted.length;
+    b.innerHTML = `<div class="k-title">Find your name</div><div class="k-sub">${left} student${left===1?'':'s'} still to vote</div>
+      <input class="search" id="kq" placeholder="🔍 Type your name…" value="${esc(kState.q)}" oninput="kState.q=this.value;drawNames()" autocomplete="off">
+      <div class="slist" id="knames"></div>`;
+    drawNames();
+  } else if (kState.step === 'vote') {
+    const who = kState.voter != null ? `Hi <b>${esc(short(DATA[k][kState.voter]))}</b> — ` : '';
+    b.innerHTML = `<div class="k-title">Choose your class representative</div><div class="k-sub">${who}tap one candidate</div>
+      <div class="cgrid">${s.cands.map(c => `<button class="ccard" onclick="pick(${c})">${av(DATA[k][c],c)}<div class="n">${esc(DATA[k][c])}</div></button>`).join('')}</div>
+      ${kState.voter != null ? `<div style="text-align:center;margin-top:20px"><button class="btn" onclick="kState.step='name';kState.voter=null;kState.q='';drawKiosk()">← Not me</button></div>` : ''}`;
+  } else {
+    b.innerHTML = `<div class="thanks"><div class="big">✅</div><div class="k-title">Thank you for voting!</div><div class="k-sub">Please pass the device to the next student.</div></div>`;
+  }
+}
+function drawNames(){
+  const k = view.sec, s = S(k), q = kState.q.trim().toLowerCase(), el = document.getElementById('knames'); if (!el) return;
+  el.innerHTML = DATA[k].map((n,i)=>({n,i})).filter(x => !s.voted.includes(x.i) && (!q || x.n.toLowerCase().includes(q)))
+    .map(({n,i}) => `<button class="sitem" onclick="kState.voter=${i};kState.step='vote';drawKiosk()">${av(n,i)}<span>${esc(n)}</span></button>`).join('')
+    || '<div class="empty">No names found — everyone may have voted already.</div>';
+}
+function pick(c){
+  const k = view.sec;
+  modal(`<div style="margin-bottom:10px">${av(DATA[k][c],c).replace('class="av"','class="av" style="width:64px;height:64px;font-size:22px;margin:0 auto;background:'+color(c)+'"')}</div>
+    <h3>Vote for ${esc(DATA[k][c])}?</h3><p class="note">You cannot change your vote after confirming.</p>
+    <div class="row" style="justify-content:center;margin-top:16px"><button class="btn" onclick="closeModal()">Go back</button>
+    <button class="btn primary" style="padding:10px 22px" onclick="castVote(${c})">✓ Confirm vote</button></div>`);
+}
+function castVote(c){
+  const s = S(view.sec); closeModal(); if (s.closed) return;
+  if (lockedSection && kState.voter == null) { toast('Select your name before voting'); return; }
+  if (kState.voter != null && s.voted.includes(kState.voter)) { toast('This student has already voted'); kState.step='name'; kState.voter=null; drawKiosk(); return; }
+  s.votes[c] = (s.votes[c]||0) + 1;
+  if (kState.voter != null && !s.voted.includes(kState.voter)) s.voted.push(kState.voter);
+  save(); kState.step = 'thanks'; drawKiosk();
+  setTimeout(() => { kState = {step: (lockedSection || state.requireName) ? 'name' : 'vote', voter:null, q:''}; if (document.getElementById('kiosk').classList.contains('show')) drawKiosk(); }, 1800);
+}
+(function holdExit(){
+  const btn = document.getElementById('kExit'), bar = btn.querySelector('i'); let t0, raf;
+  const stop = () => { cancelAnimationFrame(raf); bar.style.width = '0'; };
+  const tick = () => { const p = Math.min(1, (performance.now() - t0) / 1500); bar.style.width = p*100 + '%'; if (p >= 1) { stop(); closeKiosk(); } else raf = requestAnimationFrame(tick); };
+  btn.addEventListener('pointerdown', e => { e.preventDefault(); t0 = performance.now(); raf = requestAnimationFrame(tick); });
+  ['pointerup','pointerleave','pointercancel'].forEach(ev => btn.addEventListener(ev, stop));
+})();
+
+/* ---------- Keyboard & render ---------- */
+document.addEventListener('keydown', e => {
+  if (view.page === 'sec' && view.tab === 'count' && !document.getElementById('kiosk').classList.contains('show') && /^[1-9]$/.test(e.key) && e.target.tagName !== 'INPUT') {
+    const c = S(view.sec).cands[+e.key - 1]; if (c != null) addVote(c, 1);
+  }
+  if (e.key === 'Escape') closeModal();
+});
+document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+const titleIn = document.getElementById('elTitle');
+titleIn.value = state.title;
+titleIn.oninput = () => { state.title = titleIn.value; save(); };
+
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = view.page === 'home' ? renderHome() : view.page === 'summary' ? renderSummary() : renderSec();
+  if (view.page === 'sec' && view.tab === 'cands') drawList();
+}
+render();
+</script>
+</body>
+</html>
