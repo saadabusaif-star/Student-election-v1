@@ -249,14 +249,14 @@ async function liveSetSession(sec, active){
   const s = S(sec);
   if (active) {
     const others = await liveRequest('election_sessions?active=eq.true&class_key=neq.'+encodeURIComponent(sec)+'&select=class_key');
-    for (const other of (others || [])) await liveRequest('election_sessions?class_key=eq.'+encodeURIComponent(other.class_key), {method:'PATCH', headers:{Prefer:'return=minimal'}, body:JSON.stringify({active:false,updated_at:new Date().toISOString()})});
+    for (const other of (others || [])) await liveRequest('election_sessions?class_key=eq.'+encodeURIComponent(other.class_key), {method:'PATCH', headers:{Prefer:'return=representation'}, body:JSON.stringify({active:false,updated_at:new Date().toISOString()})});
   }
-  await liveRequest('election_sessions', {method:'POST', headers:{Prefer:'resolution=merge-duplicates,return=minimal'}, body:JSON.stringify({class_key:sec, active, candidates:s.cands, updated_at:new Date().toISOString()})});
+  await liveRequest('election_sessions', {method:'POST', headers:{Prefer:'resolution=merge-duplicates,return=representation'}, body:JSON.stringify({class_key:sec, active, candidates:s.cands, updated_at:new Date().toISOString()})});
   s.liveLoaded = true; s.active = active; save();
 }
 async function liveCastVote(sec, studentIndex, candidateIndex){
   try {
-    await liveRequest('election_votes', {method:'POST', headers:{Prefer:'return=minimal'}, body:JSON.stringify({class_key:sec, student_index:studentIndex, candidate_index:candidateIndex})});
+    await liveRequest('election_votes', {method:'POST', headers:{Prefer:'return=representation'}, body:JSON.stringify({class_key:sec, student_index:studentIndex, candidate_index:candidateIndex})});
     return true;
   } catch(err) {
     if (String(err.message).includes('409')) toast('This student has already voted'); else toast('Vote was not saved. Check the connection.');
