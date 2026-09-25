@@ -460,10 +460,14 @@ function addVote(c, d){
 }
 function undoCount(){ if (!lastCount) return; const s = S(lastCount.sec); s.votes[lastCount.c] = Math.max(0,(s.votes[lastCount.c]||0)-1); lastCount = null; save(); render(); toast('Last vote removed'); }
 
+function roleRanked(k, role){ const s=S(k), counts=(s.roleVotes&&s.roleVotes[role])||{}; return s.cands.map(c=>({c,name:DATA[k][c],v:counts[c]||0})).sort((a,b)=>b.v-a.v||a.name.localeCompare(b.name)); }
+function roleWinner(k, role){ const r=roleRanked(k,role); if(!r.length||!r[0].v) return null; const top=r.filter(x=>x.v===r[0].v); return {tie:top.length>1,names:top.map(x=>x.name),name:r[0].name,v:r[0].v}; }
 function renderResults(k, s){
   if (!s.cands.length) return `<div class="card empty">No candidates yet.</div>`;
   const r = ranked(k), t = total(k), w = winnerOf(k), max = r[0].v || 1;
+  const roleCards = BALLOT_ROLES.map(([role,label]) => { const rw=roleWinner(k,role); return `<div class=\"card panel\" style=\"margin-bottom:10px\"><b>${label}</b><div>${rw ? (rw.tie ? '⚠ Tie: '+rw.names.map(esc).join(', ') : '🏆 '+esc(rw.name)+' · '+rw.v+' vote(s)') : '— No votes yet'}</div></div>`; }).join('');
   return `
+  ${roleCards}
   ${w ? `<div class="winner"><div style="font-size:40px">🏆</div><div><div class="t">${w.tie?'Tie — revote needed':'Class representative'}</div>
      <div class="n">${w.tie ? w.names.map(esc).join(' & ') : esc(w.name)}</div><div class="meta">${w.v} vote${w.v===1?'':'s'}${t?` · ${Math.round(w.v/t*100)}%`:''}</div></div></div>` : ''}
   <div class="stats">
