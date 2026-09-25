@@ -89,7 +89,9 @@ main.wrap{flex:1;padding-top:18px;padding-bottom:40px}
 .modal .box{background:var(--card);border-radius:18px;padding:22px;max-width:460px;width:100%;max-height:92vh;overflow:auto}
 .spinner{width:42px;height:42px;border:4px solid var(--line);border-top-color:var(--navy);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto}
 @keyframes spin{to{transform:rotate(360deg)}}
-.footer{color:var(--muted);font-size:13px;text-align:center;padding:18px 16px 26px}
+.footer{color:var(--muted);font-size:13px;text-align:center;padding:18px 16px 26px;border-top:3px solid var(--gold);background:var(--card);line-height:1.7}
+.footer a{color:var(--navy-2);font-weight:700}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .footer a{color:var(--gold)} }
 
 /* Student screens */
 .s-wrap{max-width:560px;margin:0 auto}
@@ -223,7 +225,11 @@ th{font-size:13px;color:var(--muted);font-weight:800}
   </div></div>
 </header>
 <main class="wrap" id="app"><div class="card pad center" style="margin-top:30px"><div class="spinner"></div></div></main>
-<div class="footer no-print">The First Academy · ICT Department · Ajman</div>
+<footer class="footer no-print">
+  <div><b>The First Academy · ICT Department</b> · Ajman, UAE</div>
+  <div>Mr. Saad Abusaif · <a href="mailto:saad.abusaif@firstacademy.org">saad.abusaif@firstacademy.org</a></div>
+  <div class="ar" style="margin-top:2px">قسم تقنية المعلومات · الأستاذ سعد أبو سيف</div>
+</footer>
 <div class="modal" id="modal" role="dialog" aria-modal="true"><div class="box" id="modalBox"></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div id="print"></div>
@@ -328,7 +334,7 @@ const QR = (() => {
 })();
 
 /* =================== Settings =================== */
-const APP_VERSION = '2.0.0';
+const APP_VERSION = '2.0.1';
 const SUPABASE_URL = 'https://yvsskbtfabaqcgsfvreo.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_B_IMB98ZXj2uKFGoAuwuqg_PLTWRYjF';   // public key: safe to publish
 const ROLES = [
@@ -618,16 +624,18 @@ function tDash(){
 function tClass(){
   const c = T.cdata;
   if (!c) return `<div class="card pad center"><div class="spinner"></div></div>`;
-  const nC = c.candidates.length;
+  const nC = c.candidates.length, picked = (T.draft || c.candidate_idx || []).length;
   let action = '';
   if (c.status === 'open') action = `<button class="btn danger big" onclick="setStatus('closed')">■ Close voting</button>`;
-  else action = `<button class="btn ok big" ${nC < 3 ? 'disabled title="Pick at least 3 candidates first"' : ''} onclick="setStatus('open')">▶ ${c.status === 'closed' ? 'Reopen voting' : 'Open voting'}</button>`;
+  else action = `<button class="btn ok big" ${picked < 3 ? 'disabled title="Tick at least 3 candidates first (not all students)"' : ''} onclick="setStatus('open')">▶ ${c.status === 'closed' ? 'Reopen voting' : 'Open voting'}</button>`;
+  action = `<button class="btn ghost-danger" onclick="resetClass()" title="Delete this class's votes (for testing or a re-vote)">↺ Reset class</button>` + action;
   const tabs = [['cands','1 · Candidates'],['students','2 · QR slips & students'],['results','3 · Results']];
   const body = T.tab === 'cands' ? tCands(c) : T.tab === 'students' ? tStudents(c) : tResults(c);
   return `<div class="t-top no-print"><button class="btn" onclick="go('dash')">← Classes</button><h2>${esc(c.class_key)}</h2>${statusPill(c.status)}<span class="spacer"></span>${action}</div>
     <div class="stats no-print"><div class="card stat"><span class="muted small">Voted</span><b>${c.voted} / ${c.total}</b><div class="bar"><i style="width:${pct(c.voted,c.total)}%"></i></div></div>
       <div class="card stat"><span class="muted small">Candidates</span><b>${nC}</b></div>
       <div class="card stat"><span class="muted small">Not voted yet</span><b>${c.total - c.voted}</b></div></div>
+    ${c.status !== 'open' && picked < 3 ? `<div class="notice info no-print" style="margin-bottom:12px">To open voting, tick <b>only the candidates</b> (at least 3 — not all students) in <b>1 · Candidates</b>. ${picked ? `You have ${picked}; ${3 - picked} more needed.` : ''}</div>` : ''}
     ${c.status === 'setup' && nC >= 3 ? '<div class="notice warn no-print" style="margin-bottom:12px">Voting is <b>not open</b>. Students who scan now will see “Voting has not opened yet” until you press <b>Open voting</b>.</div>' : ''}
     <div class="tabs no-print">${tabs.map(([id,l]) => `<button class="tab ${T.tab===id?'on':''}" onclick="T.tab='${id}';T.lastSig='';renderTeacher()">${l}</button>`).join('')}</div>${body}`;
 }
@@ -638,7 +646,7 @@ function tCands(c){
   const dirty = JSON.stringify([...draft].sort((a,b)=>a-b)) !== JSON.stringify([...saved].sort((a,b)=>a-b));
   const q = T.q.trim().toLowerCase();
   return `<div class="card pad">
-      <div class="row"><div><h3>Who is running?</h3><div class="muted small">Pick <b>at least 3</b> students. Every student votes for a Leader, a Deputy and a Secretary from this list — one role per candidate.</div></div><span class="spacer"></span>
+      <div class="row"><div><h3>Who is running?</h3><div class="muted small">Tick only the students who are <b>running</b> (at least 3 — you do <b>not</b> need to select everyone). Every student votes for a Leader, a Deputy and a Secretary from this list — one role per candidate.</div></div><span class="spacer"></span>
       <button class="btn primary" ${(!dirty || locked) ? 'disabled' : ''} onclick="saveCands()">💾 Save candidates (${draft.length})</button></div>
       ${locked ? `<div class="notice warn" style="margin-top:12px">🔒 Candidates are locked because ${c.status === 'open' ? 'voting is open. Close voting first.' : 'votes already exist. Reset the class (Results tab) to change them.'}</div>` : ''}
       ${dirty ? '<div class="notice warn" style="margin-top:12px">You have unsaved changes.</div>' : ''}
@@ -661,7 +669,12 @@ async function setStatus(st){
   doStatus(st);
 }
 async function doStatus(st){
-  try { const r = await adminCall('ev_admin_set_status', {p_class:T.cls, p_status:st});
+  try {
+    if (st === 'open' && T.draft) {   // save ticked candidates first, so there is no separate Save step
+      const s = await adminCall('ev_admin_set_candidates', {p_class:T.cls, p_candidates:T.draft});
+      if (!s.ok) { toast(errText(s.error)); return; }
+      T.cdata = s.class; T.draft = null;
+    } const r = await adminCall('ev_admin_set_status', {p_class:T.cls, p_status:st});
     if (r.ok) { T.cdata = r.class; toast(st === 'open' ? T.cls + ' is OPEN — students can vote now' : T.cls + ' closed'); if (st === 'open' && T.tab === 'cands') T.tab = 'students'; renderTeacher(); }
     else toast(errText(r.error));
   } catch(e){ if (e.message !== 'login') toast('Not changed — connection problem'); }
@@ -738,17 +751,17 @@ function tResults(c){
       return `<div class="card res-role"><h3>${r.icon} ${r.en} · <span class="ar">${r.ar}</span></h3>
         ${res.ranking.map((x, n) => `<div class="res-row ${res.winner && res.winner.idx === x.idx ? 'first' : ''} ${before.has(x.idx) ? 'taken' : ''}"><div class="res-top"><span>${esc(x.name)}${before.has(x.idx) ? ' <span class="pill">won another role</span>' : ''}</span><span>${x.v}${t ? ' · ' + pct(x.v, t) + '%' : ''}</span></div><div class="bar"><i style="width:${x.v / max * 100}%"></i></div></div>`).join('')}
         ${res.tie ? '<div class="notice warn">Tie — decide with a short re-vote or the school rule.</div>' : ''}</div>`; }).join('')}
-    <div class="danger-zone no-print"><h3 style="color:var(--bad)">Reset this class</h3><p class="muted small">Deletes all ${t} ballot(s) for ${esc(c.class_key)} so the class can vote again. Codes stay the same. This cannot be undone.</p>
-      <button class="btn danger" ${t || c.voted ? '' : 'disabled'} onclick="resetClass()">Delete votes and reset</button></div>`;
+    <div class="danger-zone no-print"><h3 style="color:var(--bad)">Reset this class</h3><p class="muted small">Deletes all ${t} ballot(s) for ${esc(c.class_key)}, marks every student as “not voted” and sets the class back to “Not open”. Candidates and QR codes stay the same, so the same slips work again. Use it after testing or for a re-vote. This cannot be undone.</p>
+      <button class="btn danger" onclick="resetClass()">Delete votes and reset</button></div>`;
 }
 function resetClass(){
-  modal(`<h3>Delete all votes for ${esc(T.cls)}?</h3><p class="muted">Type <b>RESET</b> to confirm. This cannot be undone.</p><input class="input" id="resetIn" autocomplete="off"><div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn danger" onclick="doReset()">Delete votes</button></div>`);
+  modal(`<h3>Reset ${esc(T.cls)}?</h3><p class="muted">All votes for this class are deleted and every student can vote again with the same slip. Type <b>RESET</b> to confirm.</p><input class="input" id="resetIn" autocomplete="off"><div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn danger" onclick="doReset()">Delete votes</button></div>`);
   setTimeout(() => $('resetIn') && $('resetIn').focus(), 50);
 }
 async function doReset(){
   if (($('resetIn').value || '').trim().toUpperCase() !== 'RESET') { toast('Type RESET to confirm'); return; }
   closeModal();
-  try { const r = await adminCall('ev_admin_reset_class', {p_class:T.cls}); if (r.ok) { T.cdata = r.class; toast('Votes deleted'); renderTeacher(); } else toast(errText(r.error)); }
+  try { const r = await adminCall('ev_admin_reset_class', {p_class:T.cls}); if (r.ok) { T.cdata = r.class; toast(T.cls + ' reset — ready to vote again'); T.lastSig = ''; renderTeacher(); } else toast(errText(r.error)); }
   catch(e){ if (e.message !== 'login') toast('Connection problem'); }
 }
 
@@ -758,7 +771,19 @@ function tAll(){
     <div class="card tbl-wrap"><table><tr><th>Class</th><th>👑 Leader</th><th>🤝 Deputy</th><th>📝 Secretary</th><th>Turnout</th><th>Status</th></tr>
     ${T.data.map(c => { const R = resolve(c); return `<tr style="cursor:pointer" onclick="go('class','${c.class_key}','results')"><td><b style="white-space:nowrap">${esc(c.class_key)}</b></td>
       ${ROLES.map(r => `<td>${winnerText(R[r.key])}</td>`).join('')}<td>${c.voted}/${c.total} (${pct(c.voted,c.total)}%)</td><td>${statusPill(c.status)}</td></tr>`; }).join('')}
-    </table></div>`;
+    </table></div>
+    <div class="danger-zone no-print"><h3 style="color:var(--bad)">Reset ALL classes</h3><p class="muted small">For after testing: deletes every vote in all ${T.data.length} classes and sets them all back to “Not open”. Candidates and QR codes stay. This cannot be undone.</p>
+      <button class="btn danger" onclick="resetAll()">Reset all classes</button></div>`;
+}
+function resetAll(){
+  modal(`<h3>Reset ALL ${T.data.length} classes?</h3><p class="muted">Every vote in every class is deleted. Type <b>RESET ALL</b> to confirm.</p><input class="input" id="resetAllIn" autocomplete="off"><div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn danger" onclick="doResetAll()">Reset all</button></div>`);
+  setTimeout(() => $('resetAllIn') && $('resetAllIn').focus(), 50);
+}
+async function doResetAll(){
+  if (($('resetAllIn').value || '').trim().toUpperCase() !== 'RESET ALL') { toast('Type RESET ALL to confirm'); return; }
+  closeModal();
+  try { const r = await adminCall('ev_admin_reset_all'); if (r.ok) { T.data = r.classes; T.lastSig = ''; toast('All classes reset'); renderTeacher(); } else toast(errText(r.error)); }
+  catch(e){ if (e.message !== 'login') toast(String(e.message).includes('ev_admin_reset_all') ? 'Run update_v2_1.sql in Supabase first' : 'Connection problem'); }
 }
 function exportCSV(classes){
   const rows = [['Class','Role','Candidate','Votes','Result','Ballots','Voted','Class size','Status']];
