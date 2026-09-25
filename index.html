@@ -237,11 +237,12 @@ async function hydrateLiveSection(sec){
   try {
     const rows = await liveRequest('election_sessions?class_key=eq.'+encodeURIComponent(sec)+'&select=class_key,active,candidates');
     const row = rows && rows[0];
-    if (row) { s.cands = Array.isArray(row.candidates) ? row.candidates.map(Number).filter(i => DATA[sec][i] != null) : []; s.active = !!row.active; }
+    if (row) { s.cands = Array.isArray(row.candidates) ? row.candidates.map(Number).filter(i => DATA[sec][i] != null) : []; s.active = !!row.active || s.cands.length > 0; }
     else { s.active = false; }
-    const votes = await liveRequest('election_votes?class_key=eq.'+encodeURIComponent(sec)+'&select=student_index,candidate_index');
-    s.votes = {}; s.voted = [];
-    (votes || []).forEach(v => { s.votes[v.candidate_index] = (s.votes[v.candidate_index]||0)+1; if (!s.voted.includes(v.student_index)) s.voted.push(v.student_index); });
+    const votes = await liveRequest('election_votes?class_key=eq.'+encodeURIComponent(sec)+'&select=student_index,candidate_index,role');
+    s.votes = {}; s.roleVotes = {leader:{},deputy:{},secretary:{}}; s.voterRoles = {}; s.voted = [];
+    (votes || []).forEach(v => { const role = ['leader','deputy','secretary'].includes(v.role) ? v.role : 'leader'; s.votes[v.candidate_index] = (s.votes[v.candidate_index]||0)+1; s.roleVotes[role][v.candidate_index] = (s.roleVotes[role][v.candidate_index]||0)+1; (s.voterRoles[v.student_index] ||= []).push(role); });
+    s.voted = Object.keys(s.voterRoles).filter(i => s.voterRoles[i].length >= 3).map(Number);
     s.liveLoaded = true; save(); render();
   } catch(err) { s.liveLoaded = true; s.active = false; render(); toast('Live connection unavailable — refresh and try again'); console.error(err); }
 }
@@ -258,9 +259,9 @@ async function liveSetSession(sec, active){
   if (!check || !check[0] || check[0].active !== active) throw new Error('Activation was not confirmed by the live database');
   s.liveLoaded = true; s.active = active; save();
 }
-async function liveCastVote(sec, studentIndex, candidateIndex){
+async function liveCastVote(sec, studentIndex, candidateIndex, role){
   try {
-    await liveRequest('election_votes', {method:'POST', headers:{Prefer:'return=representation'}, body:JSON.stringify({class_key:sec, student_index:studentIndex, candidate_index:candidateIndex})});
+    await liveRequest('election_votes', {method:'POST', headers:{Prefer:'return=representation'}, body:JSON.stringify({class_key:sec, student_index:studentIndex, candidate_index:candidateIndex, role})});
     return true;
   } catch(err) {
     if (String(err.message).includes('409')) toast('This student has already voted'); else toast('Vote was not saved. Check the connection.');
@@ -523,11 +524,13 @@ document.getElementById('importFile').onchange = e => {
 function resetAll(){ if (!teacherUnlocked) { toast('Reset is available only in teacher mode'); return; } confirmBox('Reset everything?', 'All candidates and votes in every section will be deleted.', 'Delete all', () => { state = {title:state.title, sections:{}, requireName:state.requireName}; save(); render(); toast('Everything reset'); }, true); }
 
 /* ---------- Kiosk ---------- */
-let kState = {step:'name', voter:null, q:''};
+const BALLOT_ROLES = [['leader','قائد'],['deputy','نائب قائد'],['secretary','أمين السر']];
+let kState = {step:'name', voter:null, q:'', role:'leader', choices:{}};
 function openKiosk(){
   if (studentMode() && view.sec !== lockedSection) { toast('This device is locked to ' + lockedSection); return; }
   const already = personalStudentMode() && S(view.sec).voted.includes(lockedVoter);
-  kState = {step: already ? 'done' : (personalStudentMode() ? 'vote' : ((studentMode() || state.requireName) ? 'name' : 'vote')), voter: personalStudentMode() ? lockedVoter : null, q:''};
+  const roleDone = personalStudentMode() && S(view.sec).voterRoles && (S(view.sec).voterRoles[lockedVoter]||[]).length >= 3;
+  kState = {step: roleDone ? 'done' : (personalStudentMode() ? 'vote' : ((studentMode() || state.requireName) ? 'name' : 'vote')), voter: personalStudentMode() ? lockedVoter : null, q:'', role:'leader', choices:{}};
   document.getElementById('kTitle').textContent = view.sec + ' · ' + state.title;
   document.getElementById('kiosk').classList.add('show');
   try { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); } catch(e){}
@@ -555,7 +558,8 @@ function drawKiosk(){
     drawNames();
   } else if (kState.step === 'vote') {
     const who = kState.voter != null ? `Hi <b>${esc(short(DATA[k][kState.voter]))}</b> — ` : '';
-    b.innerHTML = `<div class="k-title">Choose your class representative</div><div class="k-sub">${who}tap one candidate</div>
+    const role = BALLOT_ROLES.find(x => x[0] === kState.role) || BALLOT_ROLES[0];
+    b.innerHTML = `<div class="k-title">${role[1]} — choose one candidate</div><div class="k-sub">${who}Vote 1 of 3: Leader · Deputy Leader · Secretary</div>
       <div class="cgrid">${s.cands.map(c => `<button class="ccard" onclick="pick(${c})">${av(DATA[k][c],c)}<div class="n">${esc(DATA[k][c])}</div></button>`).join('')}</div>
       ${kState.voter != null ? `<div style="text-align:center;margin-top:20px"><button class="btn" onclick="kState.step='name';kState.voter=null;kState.q='';drawKiosk()">← Not me</button></div>` : ''}`;
   } else {
@@ -570,23 +574,28 @@ function drawNames(){
     || '<div class="empty">No names found — everyone may have voted already.</div>';
 }
 function pick(c){
-  const k = view.sec;
+  const k = view.sec; const role = BALLOT_ROLES.find(x => x[0] === kState.role) || BALLOT_ROLES[0];
   modal(`<div style="margin-bottom:10px">${av(DATA[k][c],c).replace('class="av"','class="av" style="width:64px;height:64px;font-size:22px;margin:0 auto;background:'+color(c)+'"')}</div>
-    <h3>Vote for ${esc(DATA[k][c])}?</h3><p class="note">You cannot change your vote after confirming.</p>
+    <h3>${role[1]}: ${esc(DATA[k][c])}?</h3><p class="note">You will choose one candidate for each of the three roles.</p>
     <div class="row" style="justify-content:center;margin-top:16px"><button class="btn" onclick="closeModal()">Go back</button>
-    <button class="btn primary" style="padding:10px 22px" onclick="castVote(${c})">✓ Confirm vote</button></div>`);
+    <button class="btn primary" style="padding:10px 22px" onclick="castVote(${c},'${role[0]}')">✓ Confirm vote</button></div>`);
 }
-async function castVote(c){
+async function castVote(c, role){
   const s = S(view.sec); closeModal(); if (s.closed || (studentMode() && s.active === false)) return;
   if (studentMode() && kState.voter == null) { toast('Select your name before voting'); return; }
   if (personalStudentMode() && lockedVoter == null) { toast('Invalid personal student link'); return; }
-  if (kState.voter != null && s.voted.includes(kState.voter)) { toast('This student has already voted'); kState.step='name'; kState.voter=null; drawKiosk(); return; }
-  if (studentMode()) { const saved = await liveCastVote(view.sec, kState.voter, c); if (!saved) return; }
-  s.votes[c] = (s.votes[c]||0) + 1;
-  if (kState.voter != null && !s.voted.includes(kState.voter)) s.voted.push(kState.voter);
-  save(); kState.step = 'thanks'; drawKiosk();
-  setTimeout(() => { const again = personalStudentMode() && S(view.sec).voted.includes(lockedVoter); kState = {step: again ? 'done' : (personalStudentMode() ? 'vote' : ((studentMode() || state.requireName) ? 'name' : 'vote')), voter: personalStudentMode() ? lockedVoter : null, q:''}; if (document.getElementById('kiosk').classList.contains('show')) drawKiosk(); }, 1800);
+  const roles = s.voterRoles || {};
+  if (kState.voter != null && (roles[kState.voter]||[]).includes(role)) { toast('This role is already recorded'); return; }
+  if (studentMode()) { const saved = await liveCastVote(view.sec, kState.voter, c, role); if (!saved) return; }
+  s.votes[c] = (s.votes[c]||0) + 1; (s.roleVotes ||= {leader:{},deputy:{},secretary:{}})[role][c] = ((s.roleVotes[role]||{})[c]||0)+1; (s.voterRoles ||= {})[kState.voter] = [...((s.voterRoles||{})[kState.voter]||[]), role];
+  if (kState.voter != null && !s.voted.includes(kState.voter) && s.voterRoles[kState.voter].length >= 3) s.voted.push(kState.voter);
+  save();
+  const next = BALLOT_ROLES.find(x => !(s.voterRoles[kState.voter]||[]).includes(x[0]));
+  if (next) { kState.role = next[0]; drawKiosk(); toast(next[1] + ' — choose one candidate'); return; }
+  kState.step = 'thanks'; drawKiosk();
+  setTimeout(() => { const again = personalStudentMode() && S(view.sec).voted.includes(lockedVoter); kState = {step: again ? 'done' : (personalStudentMode() ? 'vote' : ((studentMode() || state.requireName) ? 'name' : 'vote')), voter: personalStudentMode() ? lockedVoter : null, q:'', role:'leader', choices:{}}; if (document.getElementById('kiosk').classList.contains('show')) drawKiosk(); }, 1800);
 }
+
 (function holdExit(){
   const btn = document.getElementById('kExit'), bar = btn.querySelector('i'); let t0, raf;
   const stop = () => { cancelAnimationFrame(raf); bar.style.width = '0'; };
@@ -621,7 +630,7 @@ function showClassQR(sec){
 function translateVisibleArabic(){
   const roots = [document.getElementById('app'), document.getElementById('kBody'), document.getElementById('modalBox')].filter(Boolean);
   const pairs = [
-    ['Choose a class section','اختيار شعبة الصف'],['Fast student voting','تصويت طلابي سريع'],['For a supervised classroom election: choose the section, identify the student, select one candidate, and confirm.','لانتخابات صفية بإشراف المعلم: اختر الشعبة، ثم حدّد اسمك، واختر مرشحاً واحداً وأكد تصويتك.'],['All grades','كل الصفوف'],['Grade 7','الصف السابع'],['Grade 8','الصف الثامن'],['Grade 9','الصف التاسع'],['Grade 10','الصف العاشر'],['Grade 11','الصف الحادي عشر'],['Grade 12','الصف الثاني عشر'],['students','طلاب'],['sections','شُعب'],['votes','أصوات'],['Not started','لم يبدأ'],['Voting','التصويت جارٍ'],['Finished','اكتمل'],['Start student voting','بدء تصويت الطلاب'],['Copy locked','نسخ رابط القفل'],['Show large QR','إظهار رمز QR كبير'],['Your class voting','تصويت صفك'],['class locked','الصف مقفل'],['This link is restricted to this class. Students can see only their own roster and can vote only once.','هذا الرابط مخصص لهذا الصف فقط. يمكن للطلاب رؤية قائمة صفهم والتصويت مرة واحدة فقط.'],['Find your name','ابحث عن اسمك'],['Choose one candidate','اختر مرشحاً واحداً'],['Confirm one vote','أكد تصويتاً واحداً'],['Class voting panel','لوحة التصويت للصف'],['Select your own name from this class, choose one candidate, and confirm. Each name can vote only once in this class.','اختر اسمك من هذا الصف، ثم اختر مرشحاً واحداً وأكد تصويتك. يمكن لكل اسم التصويت مرة واحدة فقط في هذا الصف.'],['Open voting screen','فتح شاشة التصويت'],['Open my ballot','فتح بطاقة التصويت الخاصة بي'],['Votes cast','الأصوات المسجلة'],['Class size','عدد طلاب الصف'],['Turnout','نسبة المشاركة'],['Student voting','تصويت الطلاب'],['Candidates','المرشحون'],['Device voting','التصويت عبر الجهاز'],['Count paper ballots','فرز بطاقات الاقتراع الورقية'],['Results','النتائج'],['All results','كل النتائج'],['Back','رجوع'],['Select the candidates','اختيار المرشحين'],['Clear','مسح'],['Next: start voting','التالي: بدء التصويت'],['Tap students who are running for class representative.','اضغط على الطلاب المرشحين لممثل الصف.'],['Search student name','البحث عن اسم الطالب'],['No match','لا توجد مطابقة'],['No candidates yet.','لا يوجد مرشحون بعد.'],['Choose candidates','اختيار المرشحين'],['Count paper ballots','فرز بطاقات الاقتراع'],['Undo','تراجع'],['Total:','الإجمالي:'],['Read each ballot and tap','اقرأ كل بطاقة واضغط'],['Class representative','ممثل الصف'],['Tie — revote needed','تعادل — يلزم إعادة التصويت'],['Print','طباعة'],['Reset votes','إعادة ضبط الأصوات'],['Reset everything','إعادة ضبط الكل'],['Backup & transfer','النسخ الاحتياطي والنقل'],['Download backup','تنزيل النسخة الاحتياطية'],['Restore backup','استعادة النسخة الاحتياطية'],['Voting is closed','التصويت مغلق'],['Please pass the device to the next student.','يرجى تمرير الجهاز إلى الطالب التالي.'],['Thank you for voting!','شكراً لتصويتك!'],['Find your name','ابحث عن اسمك'],['Type your name','اكتب اسمك'],['Choose your class representative','اختر ممثل صفك'],['tap one candidate','اضغط على مرشح واحد'],['Go back','عودة'],['Confirm vote','تأكيد التصويت'],['Not me','ليس أنا'],['Personal link required','الرابط الشخصي مطلوب'],['Close','إغلاق'],['Open QR image','فتح صورة QR'],['Scan this large code to open the locked class voting page.','امسح هذا الرمز الكبير لفتح صفحة التصويت المقفلة للصف.']
+    ['Choose a class section','اختيار شعبة الصف'],['Fast student voting','تصويت طلابي سريع'],['For a supervised classroom election: choose the section, identify the student, select one candidate, and confirm.','لانتخابات صفية بإشراف المعلم: اختر الشعبة، ثم حدّد اسمك، واختر مرشحاً واحداً وأكد تصويتك.'],['All grades','كل الصفوف'],['Grade 7','الصف السابع'],['Grade 8','الصف الثامن'],['Grade 9','الصف التاسع'],['Grade 10','الصف العاشر'],['Grade 11','الصف الحادي عشر'],['Grade 12','الصف الثاني عشر'],['students','طلاب'],['sections','شُعب'],['votes','أصوات'],['Not started','لم يبدأ'],['Voting','التصويت جارٍ'],['Finished','اكتمل'],['Start student voting','بدء تصويت الطلاب'],['Copy locked','نسخ رابط القفل'],['Show large QR','إظهار رمز QR كبير'],['Your class voting','تصويت صفك'],['class locked','الصف مقفل'],['This link is restricted to this class. Students can see only their own roster and can vote only once.','هذا الرابط مخصص لهذا الصف فقط. يمكن للطلاب رؤية قائمة صفهم والتصويت مرة واحدة فقط.'],['Find your name','ابحث عن اسمك'],['Choose one candidate','اختر مرشحاً واحداً لكل منصب'],['Leader','القائد'],['Deputy Leader','نائب القائد'],['Secretary','أمين السر'],['Vote 1 of 3','التصويت 1 من 3'],['Confirm one vote','أكد تصويتاً واحداً'],['Class voting panel','لوحة التصويت للصف'],['Select your own name from this class, choose one candidate, and confirm. Each name can vote only once in this class.','اختر اسمك من هذا الصف، ثم اختر مرشحاً واحداً وأكد تصويتك. يمكن لكل اسم التصويت مرة واحدة فقط في هذا الصف.'],['Open voting screen','فتح شاشة التصويت'],['Open my ballot','فتح بطاقة التصويت الخاصة بي'],['Votes cast','الأصوات المسجلة'],['Class size','عدد طلاب الصف'],['Turnout','نسبة المشاركة'],['Student voting','تصويت الطلاب'],['Candidates','المرشحون'],['Device voting','التصويت عبر الجهاز'],['Count paper ballots','فرز بطاقات الاقتراع الورقية'],['Results','النتائج'],['All results','كل النتائج'],['Back','رجوع'],['Select the candidates','اختيار المرشحين'],['Clear','مسح'],['Next: start voting','التالي: بدء التصويت'],['Tap students who are running for class representative.','اضغط على الطلاب المرشحين لممثل الصف.'],['Search student name','البحث عن اسم الطالب'],['No match','لا توجد مطابقة'],['No candidates yet.','لا يوجد مرشحون بعد.'],['Choose candidates','اختيار المرشحين'],['Count paper ballots','فرز بطاقات الاقتراع'],['Undo','تراجع'],['Total:','الإجمالي:'],['Read each ballot and tap','اقرأ كل بطاقة واضغط'],['Class representative','ممثل الصف'],['Tie — revote needed','تعادل — يلزم إعادة التصويت'],['Print','طباعة'],['Reset votes','إعادة ضبط الأصوات'],['Reset everything','إعادة ضبط الكل'],['Backup & transfer','النسخ الاحتياطي والنقل'],['Download backup','تنزيل النسخة الاحتياطية'],['Restore backup','استعادة النسخة الاحتياطية'],['Voting is closed','التصويت مغلق'],['Please pass the device to the next student.','يرجى تمرير الجهاز إلى الطالب التالي.'],['Thank you for voting!','شكراً لتصويتك!'],['Find your name','ابحث عن اسمك'],['Type your name','اكتب اسمك'],['Choose your class representative','اختر ممثل صفك'],['tap one candidate','اضغط على مرشح واحد'],['Go back','عودة'],['Confirm vote','تأكيد التصويت'],['Not me','ليس أنا'],['Personal link required','الرابط الشخصي مطلوب'],['Close','إغلاق'],['Open QR image','فتح صورة QR'],['Scan this large code to open the locked class voting page.','امسح هذا الرمز الكبير لفتح صفحة التصويت المقفلة للصف.']
   ];
   roots.forEach(root => {
     let html = root.innerHTML;
