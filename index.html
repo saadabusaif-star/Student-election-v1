@@ -136,6 +136,8 @@ h2,h3,h4,.ttl{font-family:"Baloo 2","Segoe UI",sans-serif}
 .site-footer{background:linear-gradient(180deg,var(--navy-light) 0%,var(--navy-deep) 100%);color:rgba(255,255,255,.82);border-top:4px solid var(--gold);margin-top:30px}.footer-top{padding:40px 28px 20px}.footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:36px}.site-footer h4{color:var(--gold-soft);margin:0 0 10px;font-size:18px}.site-footer p{margin:0;max-width:340px}.site-footer ul{list-style:none;margin:0;padding:0}.site-footer li{margin:6px 0}.site-footer a{color:var(--gold-soft);text-decoration:none}.site-footer a:hover{color:#fff;text-decoration:underline}.motto-row{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;padding:14px 0;font-family:"Baloo 2","Segoe UI",sans-serif;font-weight:800;font-size:13px;letter-spacing:.5px;color:var(--gold-soft)}.motto-row span:not(:last-child)::after{content:"•";margin-inline-start:14px;opacity:.5}.footer-bottom{padding:6px 28px 24px;font-size:12.5px;text-align:center}
 .btn.primary{background:var(--navy);border-color:var(--navy)}.btn.primary:hover{background:var(--navy-light)}.chip.on,.badge.live{background:var(--brand-soft);color:var(--navy);border-color:var(--navy)}.winner{background:var(--gold-soft)}
 @media (max-width:600px){.top-bar-note{display:none}.top-bar{justify-content:flex-end;padding-left:16px;padding-right:16px}.letterhead{justify-content:center;padding-left:16px;padding-right:16px}.footer-grid{grid-template-columns:1fr;gap:22px}.footer-top{padding-left:16px;padding-right:16px}.footer-bottom{padding-left:16px;padding-right:16px}}
+
+.access-gate{max-width:620px;margin:48px auto;padding:34px;text-align:center;border-top:5px solid var(--gold)}.gate-icon{font-size:48px}.access-gate h2{margin:8px 0}.gate-actions{display:flex;gap:10px;align-items:center;margin-top:20px}.gate-actions .search{flex:1}.gate-help{font-size:12px;color:var(--muted);margin:16px 0 0}.student-safety{margin-top:16px;border-left:4px solid var(--gold);font-weight:700}@media(max-width:600px){.gate-actions{flex-direction:column}.gate-actions>*{width:100%}}
 </style>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -203,14 +205,27 @@ const ORDER = Object.keys(DATA);
 const GRADES = [...new Set(ORDER.map(k => k.match(/GR-(\d+)/)[1]))];
 const KEY = 'fa-boys-election-v1';
 const COLORS = ['#0b6e4f','#1d5fa8','#8a3ffc','#c8102e','#b35c00','#00798c','#6b4f9e','#2e7d32','#ad1457','#455a64'];
-
+const CLASS_TOKENS = {"GR-7 - A":"ZVDbMzripu9txYmxKbmsp5","GR-7 - B":"mR5EXmfNQmnkbhmCsorpTeV","GR-7 - C":"S6TDKpI65brbZGh4m0DMHkQe","GR-7 - D":"LloOqJlcEzwh1OrN7H2gfZ","GR-8 - A":"w2jJUS1jjtEz9ZccUJXe5N","GR-8 - B":"sMMRM3Yk58tGD16wK6KEjdBe","GR-8 - C":"iYgo72SE5jyoFgBpcZ93OGvF","GR-8 - D":"4KFZVKRNFRGl46VGByW9H0Ts","GR-9 - A":"M4zEb9lzMVYMO8YPLDkso9eK","GR-9 - B":"tiLmTtfkZXJ4SHzpHIcUOcN1","GR-9 - C":"BG6mtQnkGYuE3JRZehcHH0y","GR-9 - D":"grq9bWLniwbeVhZYc0BCYt","GR-10 - A":"K4TxjWjag3Sq3nQQk3fuQsZw","GR-10 - B":"zFkbsASyBdeVEL2XEaX1U2E","GR-10 - C":"oSDqDA2fSnaRPCwEiNxsFmMN","GR-11 - A":"0FrTC9QXsU4zVQQmifHaESB","GR-11 - B":"zFL7qBxoWGHLr2I2BMF2fra","GR-11 - C":"XJWpsCZEmxDFXB0Y63K9Fc7u","GR-12 - A":"n4W5zHHrPql38YgHnzpek1wP","GR-12 - B":"4qOfjaBg4dXR7CiGZXIFPZl"};
+const TEACHER_PIN = 'FA-ICT-2026'; // Change this before publishing if desired.
+const urlParams = new URLSearchParams(location.search);
+const studentToken = urlParams.get('student');
+const lockedSection = Object.keys(CLASS_TOKENS).find(k => CLASS_TOKENS[k] === studentToken) || null;
+let teacherUnlocked = sessionStorage.getItem('fa-teacher-unlocked') === '1';
 let state = load();
 let view = {page:'home', sec:null, tab:'cands', grade:'all', q:''};
 let lastCount = null;
-const classLock = new URLSearchParams(location.search).get('class');
-const lockedSection = classLock && DATA[classLock] ? classLock : null;
+function studentMode(){ return !!lockedSection && !teacherUnlocked; }
 function restrictedTo(sec){ return !lockedSection || sec === lockedSection; }
-function classLink(sec){ return location.pathname + '?class=' + encodeURIComponent(sec); }
+function classLink(sec){ return location.pathname + '?student=' + encodeURIComponent(CLASS_TOKENS[sec]); }
+function unlockTeacher(){
+  const input = document.getElementById('teacherPin');
+  if (input && input.value === TEACHER_PIN) { teacherUnlocked = true; sessionStorage.setItem('fa-teacher-unlocked','1'); view.page='home'; render(); toast('Teacher mode unlocked'); }
+  else toast('Incorrect teacher PIN');
+}
+function lockTeacher(){ teacherUnlocked = false; sessionStorage.removeItem('fa-teacher-unlocked'); location.href = location.pathname; }
+function renderAccessGate(){
+  return `<div class="card access-gate"><div class="gate-icon">🔐</div><h2>Election access required</h2><p class="note">Use your class voting link, or enter the teacher PIN to open election setup and results.</p><div class="gate-actions"><input id="teacherPin" class="search" type="password" placeholder="Teacher PIN" autocomplete="off" onkeydown="if(event.key==='Enter')unlockTeacher()"><button class="btn primary" onclick="unlockTeacher()">Open teacher mode</button></div><p class="gate-help">Students must use the private link given by their teacher.</p></div>`;
+}
 
 function load(){
   try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.sections) return s; } catch(e){}
@@ -242,7 +257,8 @@ function confirmBox(title, text, okLabel, fn, danger){
 }
 
 function go(page, sec, tab){
-  if (lockedSection && page === 'summary') { toast('Results are available to the teacher only'); return; }
+  if (!teacherUnlocked && !lockedSection) { toast('Teacher permission is required'); render(); return; }
+  if (studentMode() && (page === 'summary' || (tab && tab !== 'vote'))) { toast('This student link is voting-only'); return; }
   if (sec && !restrictedTo(sec)) { toast('This device is locked to ' + lockedSection); return; }
   view.page = page; if (sec) view.sec = sec; if (tab) view.tab = tab; view.q = '';
   render(); window.scrollTo(0,0);
@@ -259,6 +275,7 @@ function renderHome(){
   const list = lockedSection ? [lockedSection] : ORDER.filter(k => view.grade === 'all' || k.startsWith('GR-'+view.grade+' '));
   return `
   <div class="row"><h2>${lockedSection ? 'Your class voting' : 'Choose a class section'}</h2><span class="spacer"></span>
+    ${teacherUnlocked ? '<button class="btn" onclick="lockTeacher()">🔒 Lock teacher mode</button>' : ''}
     <span class="meta">${lockedSection ? lockedSection : ORDER.length + ' sections · ' + ORDER.reduce((a,k)=>a+DATA[k].length,0) + ' students'}</span></div>
   <div class="card quick-start">
     <h3>${lockedSection ? '🔒 ' + lockedSection + ' — class locked' : 'Fast student voting'}</h3>
@@ -284,14 +301,14 @@ function renderHome(){
 /* ---------- Section ---------- */
 function renderSec(){
   const k = view.sec, s = S(k), [cls,txt] = status(k);
-  const tabs = [['cands','1 · Candidates'],['vote','2 · Device voting'],['count','2 · Count paper ballots'],['results','3 · Results']];
+  const tabs = teacherUnlocked ? [['cands','1 · Candidates'],['vote','2 · Device voting'],['count','2 · Count paper ballots'],['results','3 · Results']] : [['vote','Student voting']];
   let body = '';
-  if (view.tab === 'cands') body = renderCands(k, s);
+  if (view.tab === 'cands' && teacherUnlocked) body = renderCands(k, s);
   if (view.tab === 'vote') body = renderVote(k, s);
-  if (view.tab === 'count') body = renderCount(k, s);
-  if (view.tab === 'results') body = renderResults(k, s);
+  if (view.tab === 'count' && teacherUnlocked) body = renderCount(k, s);
+  if (view.tab === 'results' && teacherUnlocked) body = renderResults(k, s);
   return `
-  <div class="row no-print"><button class="btn" onclick="go('home')">← Back</button>
+  <div class="row no-print">${studentMode() ? '' : '<button class="btn" onclick="go(\'home\')">← Back</button>'}
     <h2>${k}</h2><span class="badge ${cls}">${txt}</span><span class="spacer"></span>
     <span class="meta">${DATA[k].length} students</span></div>
   <div class="tabs">${tabs.map(([id,l]) => `<button class="tab ${view.tab===id?'on':''}" onclick="view.tab='${id}';render()">${l}</button>`).join('')}</div>
@@ -382,16 +399,16 @@ function renderResults(k, s){
     <div class="bar-row ${j===0&&x.v?'first':''}"><div class="bar-top"><span>${j+1}. ${esc(x.name)}</span><span>${x.v}${t?` · ${Math.round(x.v/t*100)}%`:''}</span></div>
     <div class="bar"><i style="width:${x.v/max*100}%"></i></div></div>`).join('')}
   </div>
-  <div class="row no-print">
+  ${teacherUnlocked ? `<div class="row no-print">
     <button class="btn primary" onclick="toggleClose()">${s.closed?'🔓 Reopen voting':'🔒 Close voting'}</button>
     <button class="btn" onclick="window.print()">🖨 Print</button>
     <button class="btn" onclick="exportCSV(['${k}'])">⬇ CSV</button>
     <span class="spacer"></span>
     <button class="btn danger" onclick="resetVotes()">Reset votes</button>
-  </div>`;
+  </div>` : `<div class="card panel student-safety">🔒 Student mode: results and reset controls are disabled.</div>`} // no student admin controls`;
 }
-function toggleClose(){ const s = S(view.sec); s.closed = !s.closed; save(); render(); toast(s.closed?'Voting closed':'Voting reopened'); }
-function resetVotes(){ confirmBox('Reset votes?', `All votes for ${view.sec} will be deleted. Candidates stay.`, 'Reset', () => { const s = S(view.sec); s.votes = {}; s.voted = []; s.closed = false; save(); render(); toast('Votes reset'); }, true); }
+function toggleClose(){ if (!teacherUnlocked) { toast('Teacher permission required'); return; } const s = S(view.sec); s.closed = !s.closed; save(); render(); toast(s.closed?'Voting closed':'Voting reopened'); }
+function resetVotes(){ if (!teacherUnlocked) { toast('Reset is available only in teacher mode'); return; } confirmBox('Reset votes?', `All votes for ${view.sec} will be deleted. Candidates stay.`, 'Reset', () => { const s = S(view.sec); s.votes = {}; s.voted = []; s.closed = false; save(); render(); toast('Votes reset'); }, true); }
 
 /* ---------- Summary ---------- */
 function renderSummary(){
@@ -428,13 +445,13 @@ document.getElementById('importFile').onchange = e => {
   r.onload = () => { try { const s = JSON.parse(r.result); if (!s.sections) throw 0; state = s; save(); render(); toast('Backup restored'); } catch(err){ toast('Not a valid backup file'); } };
   r.readAsText(f); e.target.value = '';
 };
-function resetAll(){ confirmBox('Reset everything?', 'All candidates and votes in every section will be deleted.', 'Delete all', () => { state = {title:state.title, sections:{}, requireName:state.requireName}; save(); render(); toast('Everything reset'); }, true); }
+function resetAll(){ if (!teacherUnlocked) { toast('Reset is available only in teacher mode'); return; } confirmBox('Reset everything?', 'All candidates and votes in every section will be deleted.', 'Delete all', () => { state = {title:state.title, sections:{}, requireName:state.requireName}; save(); render(); toast('Everything reset'); }, true); }
 
 /* ---------- Kiosk ---------- */
 let kState = {step:'name', voter:null, q:''};
 function openKiosk(){
-  if (lockedSection && view.sec !== lockedSection) { toast('This device is locked to ' + lockedSection); return; }
-  kState = {step: (lockedSection || state.requireName) ? 'name' : 'vote', voter:null, q:''};
+  if (studentMode() && view.sec !== lockedSection) { toast('This device is locked to ' + lockedSection); return; }
+  kState = {step: (studentMode() || state.requireName) ? 'name' : 'vote', voter:null, q:''};
   document.getElementById('kTitle').textContent = view.sec + ' · ' + state.title;
   document.getElementById('kiosk').classList.add('show');
   try { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); } catch(e){}
@@ -482,12 +499,12 @@ function pick(c){
 }
 function castVote(c){
   const s = S(view.sec); closeModal(); if (s.closed) return;
-  if (lockedSection && kState.voter == null) { toast('Select your name before voting'); return; }
+  if (studentMode() && kState.voter == null) { toast('Select your name before voting'); return; }
   if (kState.voter != null && s.voted.includes(kState.voter)) { toast('This student has already voted'); kState.step='name'; kState.voter=null; drawKiosk(); return; }
   s.votes[c] = (s.votes[c]||0) + 1;
   if (kState.voter != null && !s.voted.includes(kState.voter)) s.voted.push(kState.voter);
   save(); kState.step = 'thanks'; drawKiosk();
-  setTimeout(() => { kState = {step: (lockedSection || state.requireName) ? 'name' : 'vote', voter:null, q:''}; if (document.getElementById('kiosk').classList.contains('show')) drawKiosk(); }, 1800);
+  setTimeout(() => { kState = {step: (studentMode() || state.requireName) ? 'name' : 'vote', voter:null, q:''}; if (document.getElementById('kiosk').classList.contains('show')) drawKiosk(); }, 1800);
 }
 (function holdExit(){
   const btn = document.getElementById('kExit'), bar = btn.querySelector('i'); let t0, raf;
@@ -511,6 +528,8 @@ titleIn.oninput = () => { state.title = titleIn.value; save(); };
 
 function render(){
   const app = document.getElementById('app');
+  if (!teacherUnlocked && !lockedSection) { app.innerHTML = renderAccessGate(); return; }
+  if (studentMode() && (view.page === 'home' || view.page === 'summary')) { view.page='sec'; view.sec=lockedSection; view.tab='vote'; }
   app.innerHTML = view.page === 'home' ? renderHome() : view.page === 'summary' ? renderSummary() : renderSec();
   if (view.page === 'sec' && view.tab === 'cands') drawList();
 }
