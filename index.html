@@ -241,10 +241,14 @@ function showStudentLinks(sec){
   const rows = DATA[sec].map((name, idx) => `<div class="link-row"><span>${esc(name)}</span><button class="btn" onclick="copyStudentLink('${sec}',${idx})">Copy link</button></div>`).join('');
   modal(`<h3>${esc(sec)} personal links</h3><p class="note">Give each student only their own link. It opens one ballot and cannot select another student.</p><div class="student-links">${rows}</div>`);
 }
-function unlockTeacher(){ toast('Teacher controls are not available in the student class panel.'); }
+function unlockTeacher(){
+  const input = document.getElementById('teacherPin');
+  if (input && input.value === TEACHER_PIN) { teacherUnlocked = true; sessionStorage.setItem('fa-teacher-unlocked','1'); view.page='home'; render(); toast('Teacher mode unlocked'); }
+  else toast('Incorrect teacher PIN');
+}
 function lockTeacher(){ teacherUnlocked = false; sessionStorage.removeItem('fa-teacher-unlocked'); location.href = location.pathname; }
 function renderAccessGate(){
-  return `<div class="card access-gate"><div class="gate-icon">🔒</div><h2>Class link required</h2><p class="note">Open the private link for your own class to vote. The main website does not open election controls.</p><p class="gate-help">Ask your teacher for your class voting link.</p></div>`;
+  return `<div class="card access-gate"><div class="gate-icon">🔐</div><h2>Teacher permission required</h2><p class="note">Teachers can unlock election setup and results here. Students must use their private class link.</p><div class="gate-actions"><input id="teacherPin" class="search" type="password" placeholder="Teacher PIN" autocomplete="off" onkeydown="if(event.key==='Enter')unlockTeacher()"><button class="btn primary" onclick="unlockTeacher()">Open teacher mode</button></div><p class="gate-help">Students: ask your teacher for the class voting link.</p></div>`;
 }
 
 function load(){
