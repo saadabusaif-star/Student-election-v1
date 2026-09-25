@@ -247,6 +247,10 @@ async function hydrateLiveSection(sec){
 }
 async function liveSetSession(sec, active){
   const s = S(sec);
+  if (active) {
+    const others = await liveRequest('election_sessions?active=eq.true&class_key=neq.'+encodeURIComponent(sec)+'&select=class_key');
+    for (const other of (others || [])) await liveRequest('election_sessions?class_key=eq.'+encodeURIComponent(other.class_key), {method:'PATCH', headers:{Prefer:'return=minimal'}, body:JSON.stringify({active:false,updated_at:new Date().toISOString()})});
+  }
   await liveRequest('election_sessions', {method:'POST', headers:{Prefer:'resolution=merge-duplicates,return=minimal'}, body:JSON.stringify({class_key:sec, active, candidates:s.cands, updated_at:new Date().toISOString()})});
   s.liveLoaded = true; s.active = active; save();
 }
@@ -649,6 +653,7 @@ function render(){
 }
 render();
 if (lockedSection) hydrateLiveSection(lockedSection);
+setInterval(() => { if (lockedSection) hydrateLiveSection(lockedSection); else if (teacherUnlocked && view.sec && S(view.sec).active) hydrateLiveSection(view.sec); }, 5000);
 </script>
 </body>
 </html>
