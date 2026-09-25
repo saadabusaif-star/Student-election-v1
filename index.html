@@ -251,7 +251,9 @@ async function liveSetSession(sec, active){
     const others = await liveRequest('election_sessions?active=eq.true&class_key=neq.'+encodeURIComponent(sec)+'&select=class_key');
     for (const other of (others || [])) await liveRequest('election_sessions?class_key=eq.'+encodeURIComponent(other.class_key), {method:'PATCH', headers:{Prefer:'return=representation'}, body:JSON.stringify({active:false,updated_at:new Date().toISOString()})});
   }
-  await liveRequest('election_sessions?on_conflict=class_key', {method:'POST', headers:{Prefer:'resolution=merge-duplicates,return=representation'}, body:JSON.stringify({class_key:sec, active, candidates:s.cands, updated_at:new Date().toISOString()})});
+  const row = {class_key:sec, active, candidates:s.cands, updated_at:new Date().toISOString()};
+  const changed = await liveRequest('election_sessions?class_key=eq.'+encodeURIComponent(sec), {method:'PATCH', headers:{Prefer:'return=representation'}, body:JSON.stringify({active, candidates:s.cands, updated_at:row.updated_at})});
+  if (!changed || !changed.length) await liveRequest('election_sessions', {method:'POST', headers:{Prefer:'return=representation'}, body:JSON.stringify(row)});
   const check = await liveRequest('election_sessions?class_key=eq.'+encodeURIComponent(sec)+'&select=class_key,active,candidates');
   if (!check || !check[0] || check[0].active !== active) throw new Error('Activation was not confirmed by the live database');
   s.liveLoaded = true; s.active = active; save();
@@ -316,7 +318,7 @@ function winnerOf(k){
   const top = r.filter(x => x.v === r[0].v);
   return top.length > 1 ? {tie:true, names:top.map(x=>x.name), v:r[0].v} : {tie:false, name:r[0].name, v:r[0].v};
 }
-function status(k){ const s = S(k); if (s.closed) return ['done','Closed']; if (total(k) > 0) return ['live','Voting']; if (s.cands.length) return ['live','Ready']; return ['','Not started']; }
+function status(k){ const s = S(k); if (s.closed) return ['done','Closed']; if (s.active || total(k) > 0) return ['live','Voting']; if (s.cands.length) return ['live','Ready']; return ['','Not started']; }
 function toast(m){ const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 1600); }
 function modal(html){ const m = document.getElementById('modal'); document.getElementById('modalBox').innerHTML = html; m.classList.add('show'); }
 function closeModal(){ document.getElementById('modal').classList.remove('show'); }
