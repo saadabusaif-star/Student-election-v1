@@ -196,7 +196,7 @@ h2,h3,h4,.ttl{font-family:"Baloo 2","Segoe UI",sans-serif}
     <div class="footer-grid">
       <div><h4 data-i18n="academy">The First Academy</h4><p data-i18n="footerAbout">A student election page supporting safe, meaningful, and fair student leadership choices.</p></div>
       <div><h4 data-i18n="quickLinks">Quick links</h4><ul><li><a href="#" onclick="go('home');return false">Choose section</a></li><li><a href="#" onclick="go('summary');return false">All results</a></li><li><a href="https://www.firstacademy.org/" target="_blank" rel="noopener">Main school website</a></li></ul></div>
-      <div><h4 data-i18n="contact">Contact</h4><ul><li>ICT Department</li><li>Ajman, United Arab Emirates</li><li><a href="mailto:ict@firstacademy.org">ict@firstacademy.org</a></li></ul></div>
+      <div><h4 data-i18n="contact">Contact</h4><ul><li>ICT Department</li><li>Ajman, United Arab Emirates</li><li><a href="mailto:saad.abusaif@firstacademy.org">saad.abusaif@firstacademy.org</a></li></ul></div>
     </div>
   </div>
   <div class="motto-row"><span>RESPECT</span><span>BELONG</span><span>ACHIEVE</span></div>
@@ -220,7 +220,7 @@ const voterToken = urlParams.get('voter');
 const voterRecord = VOTER_TOKENS[voterToken] || null;
 const lockedSection = voterRecord ? voterRecord[0] : (Object.keys(CLASS_TOKENS).find(k => CLASS_TOKENS[k] === studentToken) || null);
 const lockedVoter = voterRecord ? voterRecord[1] : null;
-let teacherUnlocked = !lockedSection && sessionStorage.getItem('fa-teacher-unlocked') === '1';
+let teacherUnlocked = false;
 let state = load();
 let view = {page:'home', sec:null, tab:'cands', grade:'all', q:''};
 let lastCount = null;
