@@ -140,16 +140,18 @@ h2,h3,h4,.ttl{font-family:"Baloo 2","Segoe UI",sans-serif}
 .access-gate{max-width:620px;margin:48px auto;padding:34px;text-align:center;border-top:5px solid var(--gold)}.gate-icon{font-size:48px}.access-gate h2{margin:8px 0}.gate-actions{display:flex;gap:10px;align-items:center;margin-top:20px}.gate-actions .search{flex:1}.gate-help{font-size:12px;color:var(--muted);margin:16px 0 0}.student-safety{margin-top:16px;border-left:4px solid var(--gold);font-weight:700}@media(max-width:600px){.gate-actions{flex-direction:column}.gate-actions>*{width:100%}}
 
 .student-links{max-height:55vh;overflow:auto;text-align:left;margin-top:14px}.link-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}.link-row span{flex:1;font-size:13px}.link-row .btn{padding:6px 10px;font-size:12px}
+
+.qr-large{display:block;width:min(700px,90vw);height:auto;margin:16px auto;border:12px solid #fff;border-radius:16px;box-shadow:0 8px 26px rgba(8,27,69,.2)}.qr-trigger{color:var(--navy);cursor:pointer}.ar .letter-col.en{font-family:"Nunito",sans-serif}.ar .site-nav,.ar .footer-grid{text-align:right}.ar .quick-start,.ar .card{text-align:right}
 </style>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 <header class="site-header">
   <div class="top-bar">
-    <span class="top-bar-note">🇦🇪 <span>Building Brave Tomorrow</span></span>
+    <span class="top-bar-note">🇦🇪 <span data-i18n="tagline">Building Brave Tomorrow</span></span>
     <div class="lang-toggle" role="group" aria-label="Language">
-      <button type="button" class="active">EN</button>
-      <button type="button">عربي</button>
+      <button type="button" id="btnEn" class="active" onclick="setLanguage('en')">EN</button>
+      <button type="button" id="btnAr" onclick="setLanguage('ar')">عربي</button>
     </div>
   </div>
   <div class="letterhead">
@@ -169,10 +171,10 @@ h2,h3,h4,.ttl{font-family:"Baloo 2","Segoe UI",sans-serif}
   </div>
   <nav class="site-nav" aria-label="Election navigation">
     <div class="wrap nav-inner">
-      <a href="#" onclick="go('home');return false"><span class="nav-icon">🗳️</span><span>Student election</span></a>
-      <a href="#" onclick="go('home');return false"><span class="nav-icon">🎯</span><span>Choose section</span></a>
-      <a href="#" onclick="go('summary');return false"><span class="nav-icon">🏅</span><span>All results</span></a>
-      <a href="#rules"><span class="nav-icon">🛡️</span><span>Voting rules</span></a>
+      <a href="#" onclick="go('home');return false"><span class="nav-icon">🗳️</span><span data-i18n="studentElection">Student election</span></a>
+      <a href="#" onclick="go('home');return false"><span class="nav-icon">🎯</span><span data-i18n="chooseSection">Choose section</span></a>
+      <a href="#" onclick="go('summary');return false"><span class="nav-icon">🏅</span><span data-i18n="allResults">All results</span></a>
+      <a href="#rules"><span class="nav-icon">🛡️</span><span data-i18n="votingRules">Voting rules</span></a>
     </div>
   </nav>
 </header>
@@ -181,7 +183,7 @@ h2,h3,h4,.ttl{font-family:"Baloo 2","Segoe UI",sans-serif}
 <div id="kiosk">
   <div class="k-head">
     <h3 id="kTitle"></h3>
-    <button class="btn ghost-w hold" id="kExit" title="Press and hold to exit">Hold to exit<i></i></button>
+    <button class="btn ghost-w hold" id="kExit" title="Press and hold to exit"><span data-i18n="holdToExit">Hold to exit</span><i></i></button>
   </div>
   <div class="k-body" id="kBody"></div>
 </div>
@@ -190,9 +192,9 @@ h2,h3,h4,.ttl{font-family:"Baloo 2","Segoe UI",sans-serif}
 <footer class="site-footer" id="rules">
   <div class="footer-top wrap">
     <div class="footer-grid">
-      <div><h4>The First Academy</h4><p>A student election page supporting safe, meaningful, and fair student leadership choices.</p></div>
-      <div><h4>Quick links</h4><ul><li><a href="#" onclick="go('home');return false">Choose section</a></li><li><a href="#" onclick="go('summary');return false">All results</a></li><li><a href="https://www.firstacademy.org/" target="_blank" rel="noopener">Main school website</a></li></ul></div>
-      <div><h4>Contact</h4><ul><li>ICT Department</li><li>Ajman, United Arab Emirates</li><li><a href="mailto:ict@firstacademy.org">ict@firstacademy.org</a></li></ul></div>
+      <div><h4 data-i18n="academy">The First Academy</h4><p data-i18n="footerAbout">A student election page supporting safe, meaningful, and fair student leadership choices.</p></div>
+      <div><h4 data-i18n="quickLinks">Quick links</h4><ul><li><a href="#" onclick="go('home');return false">Choose section</a></li><li><a href="#" onclick="go('summary');return false">All results</a></li><li><a href="https://www.firstacademy.org/" target="_blank" rel="noopener">Main school website</a></li></ul></div>
+      <div><h4 data-i18n="contact">Contact</h4><ul><li>ICT Department</li><li>Ajman, United Arab Emirates</li><li><a href="mailto:ict@firstacademy.org">ict@firstacademy.org</a></li></ul></div>
     </div>
   </div>
   <div class="motto-row"><span>RESPECT</span><span>BELONG</span><span>ACHIEVE</span></div>
@@ -309,7 +311,7 @@ function renderHome(){
       <div class="meta">${DATA[k].length} students · ${s.cands.length} candidates · ${total(k)} votes</div>
       ${w ? `<div class="win">🏆 ${w.tie ? 'Tie ('+w.names.length+')' : esc(short(w.name))} — ${w.v}</div>` : ''}
       <span class="btn primary start" onclick="event.stopPropagation();startStudentVoting('${k}')">▶ Start student voting</span>
-      ${!lockedSection ? `<span class="class-link" onclick="event.stopPropagation();copyClassLink('${k}')">🔗 Copy locked ${esc(k)} link</span>` : ''}
+      ${!lockedSection ? `<span class="class-link" onclick="event.stopPropagation();copyClassLink('${k}')">🔗 Copy locked ${esc(k)} link</span><span class="class-link qr-trigger" onclick="event.stopPropagation();showClassQR('${k}')">▣ Show large QR</span>` : ''}
     </button>`; }).join('')}
   </div>`;
 }
@@ -363,8 +365,8 @@ function renderVote(k, s){
   const t = total(k), n = DATA[k].length, pct = Math.round(t / n * 100);
   return `
   <div class="card panel">
-    <b>Class voting panel</b>
-    <p class="note">Select your own name from this class, choose one candidate, and confirm. Each name can vote only once in this class.</p>
+    <b data-i18n="classVotingPanel">Class voting panel</b>
+    <p class="note"><span data-i18n="classVotingNote">Select your own name from this class, choose one candidate, and confirm. Each name can vote only once in this class.</span></p>
     <div class="row" style="margin-top:16px">
       <button class="btn primary" onclick="openKiosk()" ${s.closed?'disabled':''} style="padding:12px 20px">▶ ${personalStudentMode() ? 'Open my ballot' : 'Open voting screen'}</button>
       ${s.closed ? '<span class="note">Voting is closed — reopen it in Results.</span>' : ''}
@@ -544,12 +546,38 @@ const titleIn = document.getElementById('elTitle');
 titleIn.value = state.title;
 titleIn.oninput = () => { state.title = titleIn.value; save(); };
 
+
+const QR_LOGO = 'https://raw.githubusercontent.com/saadabusaif-star/Student-election-v1/main/first-academy-logo.jpg';
+function qrImageUrl(target){
+  const config = {body:'rounded-pointed', eye:'frame14', eyeBall:'ball16', bodyColor:'#0D2C6B', bgColor:'#FFFFFF', eye1Color:'#0D2C6B', eye2Color:'#0D2C6B', eye3Color:'#0D2C6B', logo:QR_LOGO, logoMode:'default'};
+  return 'https://api.qrcode-monkey.com/qr/custom?' + new URLSearchParams({data:target, size:'700', config:JSON.stringify(config), file:'png', download:'false'}).toString();
+}
+function showClassQR(sec){
+  const target = new URL(classLink(sec), location.href).href;
+  const qr = qrImageUrl(target);
+  modal(`<h3>QR code · ${esc(sec)}</h3><p class="note">Scan this large code to open the locked class voting page.</p><img class="qr-large" src="${qr}" alt="QR code for ${esc(sec)}" loading="eager"><div class="row" style="justify-content:center;margin-top:14px"><a class="btn primary" href="${qr}" target="_blank" rel="noopener">Open QR image</a><button class="btn" onclick="closeModal()">Close</button></div>`);
+}
+function setLanguage(lang){
+  localStorage.setItem('fa-election-language', lang);
+  document.documentElement.lang = lang === 'ar' ? 'ar' : 'en';
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.body.classList.toggle('ar', lang === 'ar');
+  document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+  document.getElementById('btnAr').classList.toggle('active', lang === 'ar');
+  const t = {
+    en:{tagline:'Building Brave Tomorrow',studentElection:'Student election',chooseSection:'Choose section',allResults:'All results',votingRules:'Voting rules',holdToExit:'Hold to exit',academy:'The First Academy',footerAbout:'A student election page supporting safe, meaningful, and fair student leadership choices.',quickLinks:'Quick links',contact:'Contact'},
+    ar:{tagline:'نبني غداً شجاعاً',studentElection:'انتخابات الطلاب',chooseSection:'اختيار الصف',allResults:'كل النتائج',votingRules:'قواعد التصويت',holdToExit:'اضغط مطولاً للخروج',academy:'الأكاديمية الأولى',footerAbout:'صفحة انتخابات طلابية تدعم اختيارات آمنة وهادفة وعادلة لقيادة الطلاب.',quickLinks:'روابط سريعة',contact:'تواصل معنا',classVotingPanel:'لوحة التصويت للصف',classVotingNote:'اختر اسمك من هذا الصف، ثم اختر مرشحاً واحداً وأكد تصويتك. يمكن لكل اسم التصويت مرة واحدة فقط في هذا الصف.'}
+  }[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el => { if (t[el.dataset.i18n]) el.textContent = t[el.dataset.i18n]; });
+}
+
 function render(){
   const app = document.getElementById('app');
-  if (!teacherUnlocked && !lockedSection) { app.innerHTML = renderAccessGate(); return; }
+  if (!teacherUnlocked && !lockedSection) { app.innerHTML = renderAccessGate(); setLanguage(localStorage.getItem('fa-election-language') || 'en'); return; }
   if (studentMode() && (view.page === 'home' || view.page === 'summary')) { view.page='sec'; view.sec=lockedSection; view.tab='vote'; }
   app.innerHTML = view.page === 'home' ? renderHome() : view.page === 'summary' ? renderSummary() : renderSec();
   if (view.page === 'sec' && view.tab === 'cands') drawList();
+  setLanguage(localStorage.getItem('fa-election-language') || 'en');
 }
 render();
 </script>
