@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0D2C6B">
+<title>Student Council Election · The First Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Cairo:wght@500;700;800&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0D2C6B; --navy-2:#173d8a; --navy-soft:#e8eefb; --gold:#FFC845; --gold-deep:#b27a00; --gold-soft:#fff4d4;
+  --bg:#f3f6fb; --card:#ffffff; --ink:#14203a; --muted:#5b6780; --line:#dde3ee;
+  --ok:#0f7b4f; --ok-soft:#e2f5ec; --bad:#c62828; --bad-soft:#fdeaea; --warn:#9a6700; --warn-soft:#fff3d6;
+  --shadow:0 1px 2px rgba(13,44,107,.06),0 6px 18px rgba(13,44,107,.07); --r:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c1426; --card:#141f38; --ink:#e7ecf7; --muted:#9aa7c2; --line:#26334f; --navy-soft:#1b2a4d;
+    --gold-soft:#3a3113; --ok-soft:#12362a; --bad-soft:#3d1a1a; --warn-soft:#3a2f12; --gold-deep:#FFC845; --shadow:0 1px 2px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Nunito",-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+h1,h2,h3,h4{font-family:"Baloo 2","Nunito",sans-serif;line-height:1.2;margin:0}
+.ar{font-family:"Cairo","Segoe UI",sans-serif;direction:rtl;unicode-bidi:isolate}
+button{font:inherit;cursor:pointer;color:inherit}
+input{font:inherit;color:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px;width:100%}
+main.wrap{flex:1;padding-top:18px;padding-bottom:40px}
+
+/* Header */
+.site-header{background:var(--navy);color:#fff}
+.letterhead{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 16px;max-width:1100px;margin:0 auto}
+.lh-side{display:flex;align-items:center;gap:10px;min-width:0}
+.lh-col{font-size:11.5px;line-height:1.55;color:rgba(255,255,255,.85)}
+.lh-col p{margin:0}.lh-col .strong{color:var(--gold);font-weight:800;font-size:12px}
+.flag{width:36px;height:24px;border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.4);flex:none}
+.flag svg{display:block;width:100%;height:100%}
+.logo{width:46px;height:46px;border-radius:50%;background:#fff;border:2px solid var(--gold);padding:3px;flex:none;object-fit:contain}
+.title-bar{border-top:1px solid rgba(255,255,255,.14);border-bottom:3px solid var(--gold)}
+.title-bar .wrap{display:flex;align-items:center;gap:10px;padding-top:10px;padding-bottom:10px;flex-wrap:wrap}
+.title-bar h1{font-size:19px;color:#fff;flex:1;min-width:0}
+.title-bar h1 small{display:block;font-family:"Cairo",sans-serif;font-size:13px;color:var(--gold);font-weight:700}
+.hbtn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:10px;padding:7px 12px;font-weight:700;font-size:14px}
+.hbtn:hover{background:rgba(255,255,255,.2)}
+@media (max-width:640px){ .lh-side.right{display:none} .letterhead{justify-content:center} }
+
+/* Generic */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.pad{padding:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 16px;font-weight:800;min-height:44px;text-decoration:none;color:var(--ink)}
+.btn:hover{border-color:var(--navy-2)}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.primary:hover{background:var(--navy-2)}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#1c1400}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn.ghost-danger{color:var(--bad)}
+.btn.big{font-size:18px;padding:14px 22px;min-height:56px;border-radius:14px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.spacer{flex:1}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.center{text-align:center}
+.input{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);min-height:48px}
+.input:focus{outline:3px solid rgba(255,200,69,.55);border-color:var(--navy-2)}
+.code-input{font:800 26px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.12em;text-align:center;text-transform:uppercase}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--line);color:var(--muted);white-space:nowrap}
+.pill.open{background:var(--ok-soft);color:var(--ok)}
+.pill.open::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pulse 1.4s infinite}
+.pill.closed{background:var(--gold-soft);color:var(--gold-deep)}
+@keyframes pulse{50%{opacity:.3}}
+.notice{border-radius:12px;padding:12px 14px;font-size:15px}
+.notice.warn{background:var(--warn-soft);color:var(--warn)}
+.notice.info{background:var(--navy-soft)}
+.notice.bad{background:var(--bad-soft);color:var(--bad)}
+.notice.ok{background:var(--ok-soft);color:var(--ok)}
+.av{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:15px;color:#fff}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-weight:700;z-index:90;opacity:0;transition:.2s;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.modal{position:fixed;inset:0;background:rgba(8,16,36,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:80}
+.modal.show{display:flex}
+.modal .box{background:var(--card);border-radius:18px;padding:22px;max-width:460px;width:100%;max-height:92vh;overflow:auto}
+.spinner{width:42px;height:42px;border:4px solid var(--line);border-top-color:var(--navy);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.footer{color:var(--muted);font-size:13px;text-align:center;padding:18px 16px 26px}
+
+/* Student screens */
+.s-wrap{max-width:560px;margin:0 auto}
+.hero{padding:26px 20px;text-align:center}
+.hero .emoji{font-size:54px;line-height:1}
+.hero h2{font-size:26px;margin:10px 0 4px}
+.hero .ar{font-size:19px;font-weight:700;color:var(--muted)}
+.who{display:flex;align-items:center;gap:12px;padding:14px 16px;margin-bottom:14px}
+.who b{display:block;font-size:17px}
+.role-list{display:grid;gap:10px;margin:14px 0}
+.role-item{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:14px;background:var(--navy-soft)}
+.role-item .num{flex:none;width:34px;height:34px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:800}
+.role-item b{display:block}
+.rules{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.rules li{display:flex;gap:10px;font-size:15px}
+.stepper{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:4px 0 14px}
+.stepper div{height:8px;border-radius:4px;background:var(--line)}
+.stepper div.done{background:var(--ok)}
+.stepper div.now{background:var(--gold)}
+.step-label{font-weight:800;color:var(--muted);font-size:14px;display:flex;justify-content:space-between}
+.role-head{padding:16px 18px;margin-bottom:12px;border-left:6px solid var(--gold)}
+.role-head h2{font-size:25px;display:flex;align-items:center;gap:10px}
+.role-head .ar{font-size:20px;font-weight:800;margin-top:2px}
+.role-head p{margin:6px 0 0;color:var(--muted);font-size:15px}
+.cands{display:grid;gap:10px}
+.cand{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px;border-radius:14px;border:2px solid var(--line);background:var(--card);min-height:72px;transition:border-color .12s,background .12s}
+.cand:hover:not(:disabled){border-color:var(--navy-2)}
+.cand .nm{flex:1;font-weight:800;font-size:17px;line-height:1.3}
+.cand .tag{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-top:2px}
+.cand .radio{flex:none;width:28px;height:28px;border-radius:50%;border:2.5px solid var(--line);display:grid;place-items:center;color:#fff;font-weight:900}
+.cand.sel{border-color:var(--ok);background:var(--ok-soft)}
+.cand.sel .radio{background:var(--ok);border-color:var(--ok)}
+.cand:disabled{opacity:.5;cursor:not-allowed;background:transparent}
+.bottom-bar{position:sticky;bottom:0;margin:14px -16px 0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 70%,transparent);display:flex;gap:10px}
+.bottom-bar .btn{flex:1}
+.bottom-bar .btn.back{flex:0 0 auto}
+.review{display:grid;gap:10px;margin:12px 0}
+.rv{display:flex;align-items:center;gap:12px;padding:14px}
+.rv .ic{font-size:28px;flex:none}
+.rv .lbl{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.rv .nm{font-weight:800;font-size:17px}
+.linkbtn{background:none;border:0;color:var(--navy-2);font-weight:800;text-decoration:underline;padding:8px}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .linkbtn{color:var(--gold)} }
+
+/* Teacher */
+.t-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.t-top h2{font-size:24px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.chip{border:1px solid var(--line);background:var(--card);padding:7px 14px;border-radius:999px;font-weight:800;color:var(--muted);min-height:38px}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.ccard{text-align:left;padding:14px;border-radius:var(--r);border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px}
+.ccard:hover{border-color:var(--navy-2)}
+.ccard h3{font-size:20px}
+.bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:5px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.stat{padding:12px 14px}.stat b{display:block;font-size:26px;font-family:"Baloo 2",sans-serif}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:4px 0 16px;overflow-x:auto}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:11px 14px;font-weight:800;color:var(--muted);white-space:nowrap}
+.tab.on{color:var(--navy);border-bottom-color:var(--gold)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .tab.on{color:var(--gold)} }
+.slist{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:8px;margin-top:12px}
+.sitem{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);text-align:left;min-height:56px}
+.sitem.on{border-color:var(--ok);background:var(--ok-soft)}
+.sitem .chk{margin-left:auto;flex:none;width:24px;height:24px;border-radius:7px;border:2px solid var(--line);display:grid;place-items:center;color:#fff;font-weight:900}
+.sitem.on .chk{background:var(--ok);border-color:var(--ok)}
+.sitem:disabled{cursor:not-allowed;opacity:.75}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:13px;color:var(--muted);font-weight:800}
+.tbl-wrap{overflow-x:auto}
+.code{font:700 15px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em}
+.done-ic{color:var(--ok);font-weight:800}
+.wait-ic{color:var(--muted);font-weight:700}
+.win-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:14px}
+.win{padding:14px;border-radius:14px;background:var(--gold-soft);border:1px solid rgba(178,122,0,.25)}
+.win .lbl{font-size:13px;font-weight:800;color:var(--gold-deep);text-transform:uppercase;letter-spacing:.05em}
+.win .nm{font-weight:800;font-size:18px;margin-top:4px}
+.res-role{padding:16px;margin-bottom:12px}
+.res-row{margin:10px 0}
+.res-top{display:flex;justify-content:space-between;gap:10px;font-weight:700;font-size:15px;margin-bottom:4px}
+.res-row.first .bar i{background:var(--gold)}
+.res-row.taken{opacity:.55}
+.qr-big{width:min(300px,80vw);height:auto;display:block;margin:10px auto;border-radius:8px}
+.danger-zone{border:1.5px dashed var(--bad);border-radius:var(--r);padding:16px;margin-top:18px}
+
+/* Print */
+#print{display:none}
+@media print{
+  @page{size:A4;margin:10mm}
+  body{background:#fff;color:#000;display:block}
+  body.printing-slips > *:not(#print){display:none!important}
+  body.printing-slips #print{display:block}
+  body:not(.printing-slips) .site-header,body:not(.printing-slips) .no-print,body:not(.printing-slips) .footer,body:not(.printing-slips) .tabs{display:none!important}
+  .card{box-shadow:none;border-color:#ccc}
+  .only-print{display:block!important}
+}
+.sheet{page-break-after:always;break-after:page;overflow:hidden}
+.sheet:last-child{page-break-after:auto;break-after:auto}
+.slip{float:left;width:50%;height:66mm;border:1px dashed #888;padding:3.5mm;overflow:hidden;position:relative;font-family:"Nunito",Arial,sans-serif;color:#000;box-sizing:border-box}
+.slip .l{float:left;width:36mm;margin-right:3.5mm;text-align:center}
+.slip svg{width:34mm;height:34mm;display:block;margin:0 auto}
+.slip .cd{font:800 11.5pt ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;margin-top:1mm}
+.slip .r{overflow:hidden;font-size:7.8pt;line-height:1.3}
+.slip .sch{font-weight:800;font-size:6.8pt;color:#0D2C6B;text-transform:uppercase;letter-spacing:.03em}
+.slip .nm{font-weight:800;font-size:10.5pt;line-height:1.15;margin:1mm 0 .5mm}
+.slip .cl{font-weight:800;font-size:9pt}
+.slip ol{margin:1mm 0 0;padding-left:3.6mm}
+.slip .arx{font-family:"Cairo",Arial,sans-serif;direction:rtl;font-size:7.4pt;line-height:1.35;margin-top:1mm}
+.slip .foot{position:absolute;left:3.5mm;right:3.5mm;bottom:2.5mm}
+.slip .url{font-size:6.3pt;color:#333;word-break:break-all}
+.slip .priv{font-weight:800;font-size:7pt;margin-top:.6mm}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="letterhead">
+    <div class="lh-side">
+      <div class="flag" aria-hidden="true"><svg viewBox="0 0 100 60" preserveAspectRatio="none"><rect width="100" height="60" fill="#fff"/><rect width="100" height="20" fill="#00732F"/><rect y="40" width="100" height="20" fill="#000"/><rect width="25" height="60" fill="#FF0000"/></svg></div>
+      <div class="lh-col"><p class="strong">UNITED ARAB EMIRATES</p><p>MINISTRY OF EDUCATION</p><p>THE FIRST ACADEMY – PRIVATE, AJMAN</p></div>
+    </div>
+    <div class="lh-side right" dir="rtl">
+      <div class="lh-col ar"><p class="strong">الإمارات العربية المتحدة</p><p>وزارة التربية والتعليم</p><p>مدرسة الأكاديمية الأولى الخاصة - عجمان</p></div>
+      <img class="logo" src="first-academy-logo.jpg" alt="The First Academy logo" onerror="this.style.visibility='hidden'">
+    </div>
+  </div>
+  <div class="title-bar"><div class="wrap">
+    <h1>Student Council Election 2026–27<small>انتخابات مجلس الطلبة</small></h1>
+    <span id="hdrActions"></span>
+  </div></div>
+</header>
+<main class="wrap" id="app"><div class="card pad center" style="margin-top:30px"><div class="spinner"></div></div></main>
+<div class="footer no-print">The First Academy · ICT Department · Ajman</div>
+<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="box" id="modalBox"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div id="print"></div>
+<noscript><p style="padding:20px">Please enable JavaScript to vote.</p></noscript>
+<script>
+/* Minimal QR code generator (byte mode, error correction M, versions 1–10). */
+const QR = (() => {
+  const EXP = new Array(512), LOG = new Array(256);
+  for (let i = 0, x = 1; i < 255; i++) { EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 256) x ^= 0x11d; }
+  for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+  const mul = (a, b) => (a && b) ? EXP[LOG[a] + LOG[b]] : 0;
+  function ecc(data, n) {
+    let g = [1];
+    for (let i = 0; i < n; i++) { const ng = new Array(g.length + 1).fill(0); for (let j = 0; j < g.length; j++) { ng[j] ^= g[j]; ng[j + 1] ^= mul(g[j], EXP[i]); } g = ng; }
+    const r = new Array(n).fill(0);
+    for (const d of data) { const f = d ^ r.shift(); r.push(0); if (f) for (let j = 0; j < n; j++) r[j] ^= mul(g[j + 1], f); }
+    return r;
+  }
+  // [ec per block, blocks g1, data g1, blocks g2, data g2]
+  const T = [null, [10,1,16,0,0], [16,1,28,0,0], [26,1,44,0,0], [18,2,32,0,0], [24,2,43,0,0], [16,4,27,0,0], [18,4,31,0,0], [22,2,38,2,39], [22,3,36,2,37], [26,4,43,1,44]];
+  const AL = [null, [], [6,18], [6,22], [6,26], [6,30], [6,34], [6,22,38], [6,24,42], [6,26,46], [6,28,50]];
+  const MASKS = [(x,y)=>(x+y)%2==0,(x,y)=>y%2==0,(x,y)=>x%3==0,(x,y)=>(x+y)%3==0,(x,y)=>(Math.floor(x/3)+Math.floor(y/2))%2==0,(x,y)=>x*y%2+x*y%3==0,(x,y)=>(x*y%2+x*y%3)%2==0,(x,y)=>((x+y)%2+x*y%3)%2==0];
+
+  function encode(text, forceMask) {
+    const bytes = Array.from(new TextEncoder().encode(text));
+    let v = 1, cap;
+    for (; v <= 10; v++) { const t = T[v]; cap = t[1]*t[2] + t[3]*t[4]; if (4 + (v < 10 ? 8 : 16) + bytes.length * 8 <= cap * 8) break; }
+    if (v > 10) throw new Error('Text too long for QR');
+    const bits = []; const put = (val, len) => { for (let i = len - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+    put(4, 4); put(bytes.length, v < 10 ? 8 : 16); bytes.forEach(b => put(b, 8));
+    put(0, Math.min(4, cap * 8 - bits.length)); while (bits.length % 8) bits.push(0);
+    const data = []; for (let i = 0; i < bits.length; i += 8) data.push(parseInt(bits.slice(i, i + 8).join(''), 2));
+    for (let p = 0; data.length < cap; p++) data.push(p % 2 ? 0x11 : 0xEC);
+    const [ecn, b1, d1, b2, d2] = T[v], blocks = [], ecs = []; let k = 0;
+    for (let i = 0; i < b1 + b2; i++) { const len = i < b1 ? d1 : d2; const blk = data.slice(k, k + len); k += len; blocks.push(blk); ecs.push(ecc(blk, ecn)); }
+    const final = [];
+    for (let i = 0; i < Math.max(d1, d2); i++) blocks.forEach(b => { if (i < b.length) final.push(b[i]); });
+    for (let i = 0; i < ecn; i++) ecs.forEach(e => final.push(e[i]));
+
+    const n = 17 + 4 * v, M = [], F = [];
+    for (let y = 0; y < n; y++) { M.push(new Array(n).fill(false)); F.push(new Array(n).fill(false)); }
+    const set = (x, y, d) => { M[y][x] = d; F[y][x] = true; };
+    for (let i = 0; i < n; i++) { set(6, i, i % 2 == 0); set(i, 6, i % 2 == 0); }
+    for (const [cx, cy] of [[3,3],[n-4,3],[3,n-4]])
+      for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) {
+        const x = cx + dx, y = cy + dy; if (x < 0 || y < 0 || x >= n || y >= n) continue;
+        const d = Math.max(Math.abs(dx), Math.abs(dy)); set(x, y, d != 2 && d != 4);
+      }
+    const al = AL[v], L = al.length;
+    for (let i = 0; i < L; i++) for (let j = 0; j < L; j++) {
+      if ((i == 0 && j == 0) || (i == 0 && j == L - 1) || (i == L - 1 && j == 0)) continue;
+      for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) set(al[i] + dx, al[j] + dy, Math.max(Math.abs(dx), Math.abs(dy)) != 1);
+    }
+    const drawFormat = mask => {
+      const d = (0 << 3) | mask; let r = d; for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537);
+      const b = ((d << 10) | r) ^ 0x5412, g = i => ((b >>> i) & 1) == 1;
+      for (let i = 0; i <= 5; i++) set(8, i, g(i));
+      set(8, 7, g(6)); set(8, 8, g(7)); set(7, 8, g(8));
+      for (let i = 9; i < 15; i++) set(14 - i, 8, g(i));
+      for (let i = 0; i < 8; i++) set(n - 1 - i, 8, g(i));
+      for (let i = 8; i < 15; i++) set(8, n - 15 + i, g(i));
+      set(8, n - 8, true);
+    };
+    drawFormat(0);
+    if (v >= 7) {
+      let r = v; for (let i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11) * 0x1F25);
+      const b = (v << 12) | r;
+      for (let i = 0; i < 18; i++) { const c = ((b >>> i) & 1) == 1, a = n - 11 + i % 3, bb = Math.floor(i / 3); set(a, bb, c); set(bb, a, c); }
+    }
+    let bi = 0;
+    for (let right = n - 1; right >= 1; right -= 2) {
+      if (right == 6) right = 5;
+      for (let vert = 0; vert < n; vert++) for (let j = 0; j < 2; j++) {
+        const x = right - j, up = ((right + 1) & 2) == 0, y = up ? n - 1 - vert : vert;
+        if (!F[y][x] && bi < final.length * 8) { M[y][x] = ((final[bi >>> 3] >>> (7 - (bi & 7))) & 1) == 1; bi++; }
+      }
+    }
+    const applyMask = m => { for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (!F[y][x] && MASKS[m](x, y)) M[y][x] = !M[y][x]; };
+    const penalty = () => {
+      let p = 0, dark = 0;
+      const line = get => { let s = 0, run = 1; for (let i = 1; i < n; i++) { if (get(i) == get(i - 1)) { run++; if (run == 5) s += 3; else if (run > 5) s++; } else run = 1; } return s; };
+      const pat = get => { let s = 0; for (let i = 0; i + 6 < n; i++) { if (get(i) && !get(i+1) && get(i+2) && get(i+3) && get(i+4) && !get(i+5) && get(i+6)) {
+          const before = [1,2,3,4].every(k => i - k < 0 || !get(i - k)), after = [7,8,9,10].every(k => i + k >= n || !get(i + k)); if (before || after) s += 40; } } return s; };
+      for (let y = 0; y < n; y++) { p += line(i => M[y][i]) + pat(i => M[y][i]); }
+      for (let x = 0; x < n; x++) { p += line(i => M[i][x]) + pat(i => M[i][x]); }
+      for (let y = 0; y < n - 1; y++) for (let x = 0; x < n - 1; x++) { const c = M[y][x]; if (c == M[y][x+1] && c == M[y+1][x] && c == M[y+1][x+1]) p += 3; }
+      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (M[y][x]) dark++;
+      p += Math.floor(Math.abs(dark * 20 - n * n * 10) / (n * n)) * 10;
+      return p;
+    };
+    let best = 0, bestP = Infinity;
+    for (let m = 0; m < 8; m++) { if (forceMask != null && m !== forceMask) continue; applyMask(m); drawFormat(m); const p = penalty(); if (p < bestP) { bestP = p; best = m; } applyMask(m); }
+    applyMask(best); drawFormat(best);
+    return M;
+  }
+  function svg(text, opts = {}) {
+    const M = encode(text), n = M.length, q = 4, s = n + q * 2; let d = '';
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { if (!M[y][x]) continue; let w = 1; while (x + w < n && M[y][x + w]) w++; d += `M${x + q} ${y + q}h${w}v1h-${w}z`; x += w - 1; }
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${s} ${s}" shape-rendering="crispEdges" class="${opts.cls || 'qr'}" role="img" aria-label="QR code"><rect width="${s}" height="${s}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
+  }
+  return { encode, svg };
+})();
+
+/* =================== Settings =================== */
+const APP_VERSION = '2.0.0';
+const SUPABASE_URL = 'https://yvsskbtfabaqcgsfvreo.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_B_IMB98ZXj2uKFGoAuwuqg_PLTWRYjF';   // public key: safe to publish
+const ROLES = [
+  {key:'leader',    icon:'👑', en:'Class Leader',  ar:'قائد الصف',   desc:'Leads the class and speaks for his classmates.', descAr:'يقود الصف ويمثّل زملاءه.'},
+  {key:'deputy',    icon:'🤝', en:'Deputy Leader', ar:'نائب القائد', desc:'Helps the leader and takes his place when he is absent.', descAr:'يساعد القائد وينوب عنه عند غيابه.'},
+  {key:'secretary', icon:'📝', en:'Secretary',     ar:'أمين السر',   desc:'Writes notes and organises class tasks.', descAr:'يدوّن الملاحظات وينظّم مهام الصف.'}
+];
+const COLORS = ['#0D2C6B','#0f7b4f','#8a3ffc','#c62828','#b35c00','#00798c','#6b4f9e','#2e7d32','#ad1457','#455a64'];
+
+/* =================== Helpers =================== */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const initials = n => { const p = String(n).replace(/[()]/g,'').split(/\s+/).filter(Boolean); return ((p[0]||'?')[0] + ((p[1]||'')[0]||'')).toUpperCase(); };
+const shortName = n => { const p = String(n).split(/\s+/); return p.length > 3 ? p.slice(0,3).join(' ') : n; };
+const av = (name, i) => `<span class="av" style="background:${COLORS[i % COLORS.length]}" aria-hidden="true">${esc(initials(name))}</span>`;
+const fmtCode = c => c ? c.slice(0,4) + '-' + c.slice(4) : '';
+const normCode = c => String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
+const baseUrl = () => location.origin + location.pathname;
+const voteUrl = code => baseUrl() + '?t=' + code;
+function ss(key, val){ try { if (val === undefined) return sessionStorage.getItem(key); if (val === null) sessionStorage.removeItem(key); else sessionStorage.setItem(key, val); } catch(e){ return null; } }
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600); }
+function modal(html){ $('modalBox').innerHTML = html; $('modal').classList.add('show'); }
+function closeModal(){ $('modal').classList.remove('show'); }
+$('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* =================== Server calls =================== */
+class NetError extends Error {}
+async function rpc(fn, args){
+  const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 15000);
+  let res;
+  try {
+    res = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+      method:'POST', signal: ctl.signal, cache:'no-store',
+      headers:{ apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type':'application/json' },
+      body: JSON.stringify(args)
+    });
+  } catch(e) { throw new NetError('offline'); } finally { clearTimeout(timer); }
+  if (!res.ok) { let m = 'HTTP ' + res.status; try { const b = await res.json(); m = b.message || m; } catch(e){} throw new Error(m); }
+  return res.json();
+}
+
+/* =================== Always load the newest page =================== */
+async function ensureLatest(){
+  try {
+    const r = await fetch('version.txt?ts=' + Date.now(), {cache:'no-store'});
+    if (!r.ok) return;
+    const v = (await r.text()).trim();
+    const u = new URL(location.href);
+    if (v && v !== APP_VERSION && u.searchParams.get('_v') !== v) { u.searchParams.set('_v', v); location.replace(u.href); return true; }
+  } catch(e){}
+}
+
+/* ============================================================
+   STUDENT
+   ============================================================ */
+const S = { code:null, info:null, step:'loading', role:0, picks:{}, poll:null };
+
+function studentStart(code){
+  S.code = normCode(code);
+  history.replaceState(null, '', '?t=' + S.code);
+  loadBallot(true);
+}
+async function loadBallot(first){
+  if (first) { S.step = 'loading'; renderStudent(); }
+  try {
+    const r = await rpc('ev_get_ballot', {p_code: S.code});
+    if (!r.ok) { S.step = 'invalid'; return renderStudent(); }
+    S.info = r;
+    if (r.voted) S.step = 'voted';
+    else if (r.status === 'closed') S.step = 'closed';
+    else if (r.status !== 'open') S.step = 'wait';
+    else if (['loading','wait','closed','neterr','invalid'].includes(S.step)) { S.step = 'intro'; S.role = 0; S.picks = {}; }
+    renderStudent();
+  } catch(e) {
+    if (e instanceof NetError) { if (S.step !== 'wait') { S.step = 'neterr'; renderStudent(); } }
+    else { S.step = 'neterr'; S.err = e.message; renderStudent(); }
+  }
+  clearTimeout(S.poll);
+  if (['wait','closed','neterr'].includes(S.step)) S.poll = setTimeout(() => loadBallot(false), 4000);
+}
+
+function screen(emoji, title, titleAr, body, extra=''){
+  return `<div class="s-wrap"><div class="card hero"><div class="emoji">${emoji}</div><h2>${title}</h2><div class="ar">${titleAr}</div>
+    ${body ? `<p class="muted" style="margin:12px 0 0">${body}</p>` : ''}${extra}</div></div>`;
+}
+function whoCard(){
+  const i = S.info; if (!i) return '';
+  return `<div class="card who">${av(i.name, 0)}<div><b>${esc(i.name)}</b><span class="muted small">${esc(i.class_key)}</span></div></div>`;
+}
+function stepper(active){ return `<div class="stepper" aria-hidden="true">${[0,1,2,3].map(i => `<div class="${i < active ? 'done' : i === active ? 'now' : ''}"></div>`).join('')}</div>`; }
+
+function renderStudent(){
+  $('hdrActions').innerHTML = '';
+  const app = $('app'), i = S.info;
+  if (S.step === 'loading') { app.innerHTML = `<div class="s-wrap"><div class="card hero"><div class="spinner"></div><p class="muted">Opening your ballot…<br><span class="ar">جاري فتح ورقة التصويت…</span></p></div></div>`; return; }
+  if (S.step === 'invalid') { app.innerHTML = screen('⚠️', 'This code is not valid', 'هذا الرمز غير صالح', 'Check the code on your slip, or ask your teacher for a new slip.', codeForm()); bindCodeForm(); return; }
+  if (S.step === 'neterr') { app.innerHTML = screen('📶', 'Cannot connect to the voting server', 'تعذّر الاتصال بخادم التصويت', 'Check your internet. If the school Wi‑Fi does not work, try mobile data. We will try again automatically.', `<button class="btn primary big block" style="margin-top:16px" onclick="loadBallot(true)">↻ Try again · حاول مرة أخرى</button>`); return; }
+  if (S.step === 'wait') { app.innerHTML = whoWrap(screen('⏳', 'Voting has not opened yet', 'لم يبدأ التصويت بعد', `Your teacher will open voting for <b>${esc(i.class_key)}</b>. Keep this page open — it will start by itself.`, `<div class="spinner" style="margin-top:16px"></div>`)); return; }
+  if (S.step === 'closed') { app.innerHTML = whoWrap(screen('🔒', 'Voting is closed', 'التصويت مغلق', `Voting for ${esc(i.class_key)} is closed. Ask your teacher if you think this is a mistake.`)); return; }
+  if (S.step === 'voted') { app.innerHTML = whoWrap(screen('✅', 'You have already voted', 'لقد قمت بالتصويت مسبقاً', 'Your vote is saved. Each student can vote only once. Thank you!')); return; }
+  if (S.step === 'done') { app.innerHTML = screen('🎉', 'Your vote has been recorded', 'تم تسجيل صوتك بنجاح', `Thank you, ${esc(shortName(i.name))}! Your vote is secret. You can close this page now.`); return; }
+  if (S.step === 'sending') { app.innerHTML = `<div class="s-wrap"><div class="card hero"><div class="spinner"></div><p class="muted">Sending your vote…<br><span class="ar">جاري إرسال صوتك…</span></p></div></div>`; return; }
+  if (S.step === 'intro') {
+    app.innerHTML = `<div class="s-wrap">
+      <div class="card hero" style="padding-bottom:18px"><div class="emoji">🗳️</div><h2>Welcome, ${esc(shortName(i.name))}!</h2><div class="ar">أهلاً بك في انتخابات الصف</div>
+      <p class="muted" style="margin:8px 0 0">${esc(i.class_key)} · Student Council Election</p></div>
+      <div class="card pad" style="margin-top:12px">
+        <h3>You will choose 3 different classmates</h3><div class="ar muted" style="font-weight:700">ستختار ثلاثة زملاء مختلفين</div>
+        <div class="role-list">${ROLES.map((r, n) => `<div class="role-item"><span class="num">${n+1}</span><div><b>${r.icon} ${r.en} · <span class="ar">${r.ar}</span></b><span class="muted small">${r.desc}</span></div></div>`).join('')}</div>
+        <ul class="rules">
+          <li>☝️<span>One classmate can have <b>only one role</b>.<br><span class="ar muted small">لا يمكن اختيار الطالب نفسه لأكثر من منصب.</span></span></li>
+          <li>↩️<span>You can go back and change before you submit.<br><span class="ar muted small">يمكنك الرجوع والتعديل قبل الإرسال.</span></span></li>
+          <li>🔒<span>After you submit, you cannot vote again. Your vote is secret.<br><span class="ar muted small">بعد الإرسال لا يمكنك التصويت مرة أخرى، وصوتك سرّي.</span></span></li>
+        </ul>
+      </div>
+      <div class="bottom-bar"><button class="btn gold big" id="startBtn" onclick="S.step='role';S.role=0;renderStudent();scrollTo(0,0)">Start voting · ابدأ التصويت →</button></div></div>`;
+    return;
+  }
+  if (S.step === 'role') {
+    const role = ROLES[S.role], mine = S.picks[role.key];
+    const takenBy = {}; ROLES.forEach(r => { if (r.key !== role.key && S.picks[r.key] != null) takenBy[S.picks[r.key]] = r; });
+    app.innerHTML = `<div class="s-wrap">
+      <div class="step-label"><span>Step ${S.role+1} of 3</span><span class="ar">الخطوة ${S.role+1} من 3</span></div>
+      ${stepper(S.role)}
+      <div class="card role-head"><h2><span>${role.icon}</span> Choose your ${role.en}</h2><div class="ar">اختر ${role.ar}</div><p>${role.desc} <span class="ar">${role.descAr}</span></p></div>
+      <div class="cands" role="radiogroup" aria-label="${role.en}">
+        ${i.candidates.map((c, n) => { const t = takenBy[c.idx], sel = mine === c.idx;
+          return `<button class="cand ${sel?'sel':''}" role="radio" aria-checked="${sel}" ${t?'disabled':''} onclick="pickCand(${c.idx})">
+            ${av(c.name, n)}<span class="nm">${esc(c.name)}${t ? `<span class="tag">Already chosen as ${t.en} · <span class="ar">${t.ar}</span></span>` : ''}</span><span class="radio">${sel?'✓':''}</span></button>`; }).join('')}
+      </div>
+      <div class="bottom-bar">
+        <button class="btn back" onclick="stepBack()">← Back</button>
+        <button class="btn primary big" ${mine == null ? 'disabled' : ''} onclick="stepNext()">${S.role < 2 ? `Next: ${ROLES[S.role+1].en} →` : 'Review my vote →'}</button>
+      </div></div>`;
+    return;
+  }
+  if (S.step === 'review') {
+    const nameOf = idx => (i.candidates.find(c => c.idx === idx) || {}).name || '?';
+    app.innerHTML = `<div class="s-wrap">
+      <div class="step-label"><span>Check and submit</span><span class="ar">راجع ثم أرسل</span></div>${stepper(3)}
+      <div class="card role-head"><h2>✔️ Is this correct?</h2><div class="ar">هل اختياراتك صحيحة؟</div><p>Tap <b>Change</b> to fix a choice. When you submit, your vote is final.</p></div>
+      <div class="review">${ROLES.map((r, n) => `<div class="card rv"><span class="ic">${r.icon}</span><div style="flex:1;min-width:0"><div class="lbl">${r.en} · <span class="ar">${r.ar}</span></div><div class="nm">${esc(nameOf(S.picks[r.key]))}</div></div><button class="linkbtn" onclick="S.step='role';S.role=${n};renderStudent()">Change</button></div>`).join('')}</div>
+      <div class="bottom-bar"><button class="btn back" onclick="stepBack()">← Back</button><button class="btn ok big" id="submitBtn" onclick="submitBallot()">✓ Submit my vote · أرسل صوتي</button></div></div>`;
+    return;
+  }
+}
+function whoWrap(html){ return `<div class="s-wrap">${whoCard()}</div>` + html; }
+function pickCand(idx){ S.picks[ROLES[S.role].key] = idx; renderStudent(); }
+function stepNext(){ if (S.picks[ROLES[S.role].key] == null) return; if (S.role < 2) { S.role++; } else S.step = 'review'; renderStudent(); scrollTo(0,0); }
+function stepBack(){ if (S.step === 'review') { S.step = 'role'; S.role = 2; } else if (S.role > 0) S.role--; else S.step = 'intro'; renderStudent(); scrollTo(0,0); }
+async function submitBallot(){
+  const p = S.picks; S.step = 'sending'; renderStudent();
+  try {
+    const r = await rpc('ev_submit_ballot', {p_code:S.code, p_leader:p.leader, p_deputy:p.deputy, p_secretary:p.secretary});
+    if (r.ok) { S.step = 'done'; renderStudent(); return; }
+    if (r.error === 'already_voted') { S.step = 'voted'; renderStudent(); return; }
+    if (r.error === 'not_open') { S.step = 'closed'; renderStudent(); loadBallot(false); return; }
+    toast('The candidate list changed. Please choose again.'); S.step = 'loading'; S.picks = {}; loadBallot(true);
+  } catch(e) {
+    S.step = 'review'; renderStudent();
+    modal(`<h3>Your vote was NOT sent</h3><p class="ar" style="font-weight:700">لم يتم إرسال صوتك</p><p class="muted">${e instanceof NetError ? 'No internet connection. Check Wi‑Fi or mobile data, then press Submit again.' : 'Server error: ' + esc(e.message)}</p><button class="btn primary block" onclick="closeModal()">OK</button>`);
+  }
+}
+function codeForm(){
+  return `<form id="codeForm" style="margin-top:16px;text-align:left" autocomplete="off">
+    <label for="codeIn" class="small muted" style="font-weight:800">Code on your slip · الرمز الموجود في ورقتك</label>
+    <input id="codeIn" class="input code-input" inputmode="text" maxlength="9" placeholder="XXXX-XXXX" autocapitalize="characters" spellcheck="false">
+    <button class="btn primary big block" style="margin-top:10px">Open my ballot →</button></form>`;
+}
+function bindCodeForm(){
+  const f = $('codeForm'), inp = $('codeIn'); if (!f) return;
+  inp.addEventListener('input', () => { const c = normCode(inp.value).slice(0,8); inp.value = c.length > 4 ? c.slice(0,4) + '-' + c.slice(4) : c; });
+  f.addEventListener('submit', e => { e.preventDefault(); const c = normCode(inp.value); if (c.length !== 8) { toast('The code has 8 letters/numbers'); return; } studentStart(c); });
+}
+function renderLanding(msg){
+  $('hdrActions').innerHTML = `<button class="hbtn" onclick="renderLogin()">Teacher</button>`;
+  $('app').innerHTML = `<div class="s-wrap">
+    ${msg ? `<div class="notice warn" style="margin-bottom:12px">${msg}</div>` : ''}
+    <div class="card hero"><div class="emoji">📱</div><h2>Student voting</h2><div class="ar">تصويت الطلاب</div>
+    <p class="muted" style="margin:10px 0 0">Scan the QR code on your slip with your phone camera — or type the code below.</p>
+    ${codeForm()}</div></div>`;
+  bindCodeForm();
+}
+
+/* ============================================================
+   TEACHER
+   ============================================================ */
+const T = { pin:null, page:'dash', cls:null, tab:'cands', grade:'all', q:'', data:null, cdata:null, draft:null, poll:null, busy:false, lastSig:'' };
+
+function renderLogin(msg){
+  stopTeacherPoll();
+  $('hdrActions').innerHTML = `<button class="hbtn" onclick="location.href=baseUrl()">Student page</button>`;
+  $('app').innerHTML = `<div class="s-wrap"><div class="card hero"><div class="emoji">🔐</div><h2>Teacher dashboard</h2><div class="ar">لوحة المعلم</div>
+    ${msg ? `<div class="notice bad" style="margin-top:12px">${msg}</div>` : ''}
+    <form id="pinForm" style="margin-top:16px;text-align:left"><label for="pinIn" class="small muted" style="font-weight:800">Teacher PIN</label>
+    <input id="pinIn" class="input" type="password" autocomplete="current-password" required>
+    <button class="btn primary big block" id="pinBtn" style="margin-top:10px">Open dashboard</button></form></div></div>`;
+  $('pinIn').focus();
+  $('pinForm').addEventListener('submit', async e => {
+    e.preventDefault(); const pin = $('pinIn').value; $('pinBtn').disabled = true;
+    try { const r = await rpc('ev_admin_login', {p_pin: pin});
+      if (r.ok) { T.pin = pin; ss('ev-pin', pin); T.page = 'dash'; teacherLoad(); }
+      else renderLogin(r.error === 'locked' ? 'Too many wrong PINs. Wait 15 minutes and try again.' : 'Wrong PIN. Try again.');
+    } catch(err) { renderLogin(err instanceof NetError ? 'Cannot reach the voting server. Check the internet connection.' : 'Server error: ' + esc(err.message) + '. Did you run setup.sql in Supabase?'); }
+  });
+}
+function logout(){ ss('ev-pin', null); T.pin = null; renderLogin(); }
+function stopTeacherPoll(){ clearTimeout(T.poll); T.poll = null; }
+function schedulePoll(){ stopTeacherPoll(); T.poll = setTimeout(() => teacherLoad(true), 5000); }
+
+async function adminCall(fn, args){
+  const r = await rpc(fn, Object.assign({p_pin: T.pin}, args || {}));
+  if (!r.ok && (r.error === 'bad_pin' || r.error === 'locked')) { logout(); throw new Error('login'); }
+  return r;
+}
+async function teacherLoad(silent){
+  if (!T.pin) return renderLogin();
+  try {
+    if (T.page === 'class') {
+      const r = await adminCall('ev_admin_class', {p_class: T.cls});
+      if (r.ok) T.cdata = r.class;
+    } else {
+      const r = await adminCall('ev_admin_overview');
+      if (r.ok) T.data = r.classes;
+    }
+    T.offline = false;
+  } catch(e) { if (e.message === 'login') return; T.offline = true; }
+  renderTeacher(silent);
+  schedulePoll();
+}
+function go(page, cls, tab){ T.page = page; if (cls) T.cls = cls; if (tab) T.tab = tab; T.q = ''; T.draft = null; T.lastSig = ''; if (page === 'class') T.cdata = null; renderTeacher(); teacherLoad(); scrollTo(0,0); }
+
+function statusPill(s){ return s === 'open' ? '<span class="pill open">Voting open</span>' : s === 'closed' ? '<span class="pill closed">Closed</span>' : '<span class="pill">Not open</span>'; }
+
+/* Winner rules: roles decided in order; someone who already won a role is skipped for the next role. */
+function resolve(c){
+  const taken = new Set(), out = {};
+  ROLES.forEach(r => {
+    const t = (c.tally || {})[r.key] || {};
+    const ranking = c.candidates.map(x => ({idx:x.idx, name:x.name, v:t[x.idx] || 0})).sort((a,b) => b.v - a.v || a.name.localeCompare(b.name));
+    const eligible = ranking.filter(x => !taken.has(x.idx));
+    let res = {ranking, winner:null, tie:null};
+    if (eligible.length && eligible[0].v > 0) {
+      const top = eligible.filter(x => x.v === eligible[0].v);
+      if (top.length > 1) res.tie = top; else { res.winner = top[0]; taken.add(top[0].idx); }
+    }
+    res.taken = new Set(taken); out[r.key] = res;
+  });
+  return out;
+}
+function winnerText(res){ return res.winner ? esc(res.winner.name) : res.tie ? '⚠ Tie: ' + res.tie.map(x => esc(shortName(x.name))).join(' / ') : '<span class="muted">—</span>'; }
+
+function renderTeacher(silent){
+  if (!T.pin) return renderLogin();
+  const html = T.page === 'class' ? tClass() : T.page === 'all' ? tAll() : tDash();
+  const sig = html;
+  if (silent && sig === T.lastSig) return;   // nothing changed → do not disturb the page
+  T.lastSig = sig;
+  const a = document.activeElement, id = a && a.id, pos = a && a.selectionStart;
+  $('hdrActions').innerHTML = `<button class="hbtn" onclick="go('dash')">Classes</button> <button class="hbtn" onclick="go('all')">All results</button> <button class="hbtn" onclick="logout()">Log out</button>`;
+  $('app').innerHTML = (T.offline ? `<div class="notice bad no-print" style="margin-bottom:12px">📶 Connection problem — showing the last data. Retrying…</div>` : '') + html;
+  if (id && $(id)) { $(id).focus(); try { $(id).setSelectionRange(pos, pos); } catch(e){} }
+}
+
+function tDash(){
+  if (!T.data) return `<div class="card pad center"><div class="spinner"></div></div>`;
+  const grades = [...new Set(T.data.map(c => c.grade))];
+  const list = T.data.filter(c => T.grade === 'all' || c.grade == T.grade);
+  const open = T.data.filter(c => c.status === 'open').length, voted = T.data.reduce((a,c) => a + c.voted, 0), total = T.data.reduce((a,c) => a + c.total, 0);
+  return `<div class="t-top"><h2>Classes</h2><span class="spacer"></span></div>
+    <div class="stats"><div class="card stat"><span class="muted small">Classes open now</span><b>${open}</b></div>
+      <div class="card stat"><span class="muted small">Students voted</span><b>${voted} / ${total}</b></div>
+      <div class="card stat"><span class="muted small">Turnout</span><b>${pct(voted,total)}%</b></div></div>
+    <div class="notice info small no-print" style="margin-bottom:14px"><b>How it works:</b> 1) open a class → pick at least 3 candidates · 2) print the QR slips and hand them out · 3) press <b>Open voting</b> · 4) students scan and vote · 5) <b>Close voting</b> and see results. Several classes can vote at the same time.</div>
+    <div class="chips"><button class="chip ${T.grade==='all'?'on':''}" onclick="T.grade='all';renderTeacher()">All grades</button>
+      ${grades.map(g => `<button class="chip ${T.grade==g?'on':''}" onclick="T.grade=${g};renderTeacher()">Grade ${g}</button>`).join('')}</div>
+    <div class="grid">${list.map(c => `<button class="ccard" onclick="go('class','${c.class_key}','${c.candidates.length >= 3 ? 'students' : 'cands'}')">
+      <div class="row"><h3>${esc(c.class_key)}</h3><span class="spacer"></span>${statusPill(c.status)}</div>
+      <div class="muted small">${c.candidates.length} candidate${c.candidates.length===1?'':'s'} · ${c.voted}/${c.total} voted</div>
+      <div class="bar"><i style="width:${pct(c.voted,c.total)}%"></i></div>
+      ${c.candidates.length < 3 ? '<div class="small" style="color:var(--warn);font-weight:700">Needs candidates</div>' : ''}
+    </button>`).join('')}</div>`;
+}
+
+function tClass(){
+  const c = T.cdata;
+  if (!c) return `<div class="card pad center"><div class="spinner"></div></div>`;
+  const nC = c.candidates.length;
+  let action = '';
+  if (c.status === 'open') action = `<button class="btn danger big" onclick="setStatus('closed')">■ Close voting</button>`;
+  else action = `<button class="btn ok big" ${nC < 3 ? 'disabled title="Pick at least 3 candidates first"' : ''} onclick="setStatus('open')">▶ ${c.status === 'closed' ? 'Reopen voting' : 'Open voting'}</button>`;
+  const tabs = [['cands','1 · Candidates'],['students','2 · QR slips & students'],['results','3 · Results']];
+  const body = T.tab === 'cands' ? tCands(c) : T.tab === 'students' ? tStudents(c) : tResults(c);
+  return `<div class="t-top no-print"><button class="btn" onclick="go('dash')">← Classes</button><h2>${esc(c.class_key)}</h2>${statusPill(c.status)}<span class="spacer"></span>${action}</div>
+    <div class="stats no-print"><div class="card stat"><span class="muted small">Voted</span><b>${c.voted} / ${c.total}</b><div class="bar"><i style="width:${pct(c.voted,c.total)}%"></i></div></div>
+      <div class="card stat"><span class="muted small">Candidates</span><b>${nC}</b></div>
+      <div class="card stat"><span class="muted small">Not voted yet</span><b>${c.total - c.voted}</b></div></div>
+    ${c.status === 'setup' && nC >= 3 ? '<div class="notice warn no-print" style="margin-bottom:12px">Voting is <b>not open</b>. Students who scan now will see “Voting has not opened yet” until you press <b>Open voting</b>.</div>' : ''}
+    <div class="tabs no-print">${tabs.map(([id,l]) => `<button class="tab ${T.tab===id?'on':''}" onclick="T.tab='${id}';T.lastSig='';renderTeacher()">${l}</button>`).join('')}</div>${body}`;
+}
+
+function tCands(c){
+  const locked = c.status === 'open' || c.ballots > 0;
+  const saved = c.candidate_idx || [], draft = T.draft || saved;
+  const dirty = JSON.stringify([...draft].sort((a,b)=>a-b)) !== JSON.stringify([...saved].sort((a,b)=>a-b));
+  const q = T.q.trim().toLowerCase();
+  return `<div class="card pad">
+      <div class="row"><div><h3>Who is running?</h3><div class="muted small">Pick <b>at least 3</b> students. Every student votes for a Leader, a Deputy and a Secretary from this list — one role per candidate.</div></div><span class="spacer"></span>
+      <button class="btn primary" ${(!dirty || locked) ? 'disabled' : ''} onclick="saveCands()">💾 Save candidates (${draft.length})</button></div>
+      ${locked ? `<div class="notice warn" style="margin-top:12px">🔒 Candidates are locked because ${c.status === 'open' ? 'voting is open. Close voting first.' : 'votes already exist. Reset the class (Results tab) to change them.'}</div>` : ''}
+      ${dirty ? '<div class="notice warn" style="margin-top:12px">You have unsaved changes.</div>' : ''}
+      ${draft.length && draft.length < 3 ? '<div class="notice bad" style="margin-top:12px">Pick at least 3 candidates.</div>' : ''}
+    </div>
+    <input class="input" id="candSearch" style="margin-top:12px" placeholder="🔍 Search student name…" value="${esc(T.q)}" oninput="T.q=this.value;renderTeacher()">
+    <div class="slist">${c.students.filter(s => !q || s.name.toLowerCase().includes(q)).map(s => { const on = draft.includes(s.idx);
+      return `<button class="sitem ${on?'on':''}" ${locked?'disabled':''} onclick="toggleCand(${s.idx})">${av(s.name, s.idx)}<span>${esc(s.name)}</span><span class="chk">${on?'✓':''}</span></button>`; }).join('') || '<div class="muted">No match</div>'}</div>`;
+}
+function toggleCand(idx){ const d = [...(T.draft || T.cdata.candidate_idx || [])]; const i = d.indexOf(idx); if (i >= 0) d.splice(i,1); else d.push(idx); T.draft = d; renderTeacher(); }
+async function saveCands(){
+  try { const r = await adminCall('ev_admin_set_candidates', {p_class:T.cls, p_candidates:T.draft});
+    if (r.ok) { T.cdata = r.class; T.draft = null; toast('Candidates saved'); renderTeacher(); }
+    else toast(errText(r.error));
+  } catch(e){ if (e.message !== 'login') toast('Not saved — connection problem'); }
+}
+function errText(e){ return ({is_open:'Close voting first.', has_votes:'Votes exist — reset the class first.', need_3_candidates:'Pick and save at least 3 candidates first.', already_voted:'This student already voted.', no_class:'Class not found.'})[e] || ('Error: ' + e); }
+async function setStatus(st){
+  if (st === 'closed') { modal(`<h3>Close voting for ${esc(T.cls)}?</h3><p class="muted">Students will not be able to vote. You can reopen later.</p><div class="row" style="justify-content:flex-end"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn danger" onclick="closeModal();doStatus('closed')">Close voting</button></div>`); return; }
+  doStatus(st);
+}
+async function doStatus(st){
+  try { const r = await adminCall('ev_admin_set_status', {p_class:T.cls, p_status:st});
+    if (r.ok) { T.cdata = r.class; toast(st === 'open' ? T.cls + ' is OPEN — students can vote now' : T.cls + ' closed'); if (st === 'open' && T.tab === 'cands') T.tab = 'students'; renderTeacher(); }
+    else toast(errText(r.error));
+  } catch(e){ if (e.message !== 'login') toast('Not changed — connection problem'); }
+}
+
+function tStudents(c){
+  const q = T.q.trim().toLowerCase(), left = c.students.filter(s => !s.voted).length;
+  return `<div class="card pad no-print"><h3>QR slips</h3>
+      <p class="muted small" style="margin:4px 0 12px">Each student gets his own slip with a personal QR code. A code works once, only for this class. Keep slips private — whoever has the slip can vote with it.</p>
+      <div class="row"><button class="btn primary" onclick="printSlips(false)">🖨 Print all ${c.total} slips</button>
+        <button class="btn" ${left ? '' : 'disabled'} onclick="printSlips(true)">🖨 Print slips for ${left} not voted</button>
+        <span class="spacer"></span>
+        <button class="btn ghost-danger" ${c.ballots ? 'disabled title="Only before any vote"' : ''} onclick="newClassCodes()">↻ New codes for whole class</button></div></div>
+    <input class="input no-print" id="stuSearch" style="margin-top:12px" placeholder="🔍 Search student…" value="${esc(T.q)}" oninput="T.q=this.value;renderTeacher()">
+    <div class="card tbl-wrap" style="margin-top:12px"><table>
+      <tr><th>#</th><th>Student</th><th>Status</th><th>Code</th><th class="no-print"></th></tr>
+      ${c.students.filter(s => !q || s.name.toLowerCase().includes(q)).map(s => `<tr>
+        <td class="muted">${s.idx+1}</td><td><b>${esc(s.name)}</b>${(c.candidate_idx||[]).includes(s.idx) ? ' <span class="pill">candidate</span>' : ''}</td>
+        <td>${s.voted ? '<span class="done-ic">✓ Voted</span>' : '<span class="wait-ic">○ Not yet</span>'}</td>
+        <td class="code">${fmtCode(s.code)}</td>
+        <td class="no-print" style="white-space:nowrap"><button class="btn" onclick="showQR(${s.idx})">QR</button>
+          ${s.voted ? '' : `<button class="btn" onclick="newCode(${s.idx})" title="Lost or shared slip">New code</button>`}</td></tr>`).join('')}
+    </table></div>`;
+}
+function showQR(idx){
+  const s = T.cdata.students.find(x => x.idx === idx), url = voteUrl(s.code);
+  modal(`<h3>${esc(s.name)}</h3><div class="muted small">${esc(T.cls)} · personal voting code</div>${QR.svg(url, {cls:'qr-big'})}
+    <div class="center code" style="font-size:24px">${fmtCode(s.code)}</div>
+    <p class="muted small center">Student scans this, or types the code at <b>${esc(baseUrl())}</b></p>
+    <div class="row" style="justify-content:center"><a class="btn primary" href="${esc(url)}" target="_blank" rel="noopener">Vote on this device</a><button class="btn" onclick="closeModal()">Close</button></div>`);
+}
+function newCode(idx){
+  const s = T.cdata.students.find(x => x.idx === idx);
+  modal(`<h3>New code for ${esc(shortName(s.name))}?</h3><p class="muted">His old slip will stop working. Use this if the slip was lost or someone else saw it.</p><div class="row" style="justify-content:flex-end"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="closeModal();doNewCode(${idx})">Make new code</button></div>`);
+}
+async function doNewCode(idx){
+  try { const r = await adminCall('ev_admin_new_code', {p_class:T.cls, p_idx:idx}); if (r.ok) { T.cdata = r.class; renderTeacher(); showQR(idx); } else toast(errText(r.error)); }
+  catch(e){ if (e.message !== 'login') toast('Connection problem'); }
+}
+function newClassCodes(){
+  modal(`<h3>New codes for all of ${esc(T.cls)}?</h3><p class="muted">Every slip already printed for this class will stop working. You must print new slips.</p><div class="row" style="justify-content:flex-end"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn danger" onclick="closeModal();doClassCodes()">Replace all codes</button></div>`);
+}
+async function doClassCodes(){
+  try { const r = await adminCall('ev_admin_new_class_codes', {p_class:T.cls}); if (r.ok) { T.cdata = r.class; renderTeacher(); toast('New codes created — print new slips'); } else toast(errText(r.error)); }
+  catch(e){ if (e.message !== 'login') toast('Connection problem'); }
+}
+function printSlips(onlyLeft){
+  const c = T.cdata, list = c.students.filter(s => !onlyLeft || !s.voted);
+  const sheets = []; for (let k = 0; k < list.length; k += 8) sheets.push(list.slice(k, k + 8));
+  $('print').innerHTML = sheets.map(sh => `<div class="sheet">${sh.map(s => `<div class="slip">
+    <div class="l">${QR.svg(voteUrl(s.code))}<div class="cd">${fmtCode(s.code)}</div></div>
+    <div class="r"><div class="sch">The First Academy · Student Council Election</div>
+      <div class="nm">${esc(s.name)}</div><div class="cl">${esc(c.class_key)}</div>
+      <ol><li>Scan the QR with your phone camera.</li><li>Choose Leader, Deputy and Secretary.</li><li>Check, then press Submit (one time only).</li></ol>
+      <div class="arx">امسح الرمز ← اختر القائد والنائب وأمين السر ← اضغط إرسال (مرة واحدة فقط)</div>
+      </div><div class="foot"><div class="url">No camera? Open ${esc(baseUrl().replace(/^https?:\/\//,''))} and type the code.</div>
+      <div class="priv">🔒 Keep this slip private · لا تشارك هذه الورقة</div></div></div>`).join('')}</div>`).join('');
+  document.body.classList.add('printing-slips');
+  const done = () => { document.body.classList.remove('printing-slips'); window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  setTimeout(() => { window.print(); setTimeout(done, 500); }, 150);
+}
+
+function tResults(c){
+  const R = resolve(c), t = c.ballots;
+  return `<div class="row no-print" style="margin-bottom:12px"><h3 style="flex:1">Results · ${esc(c.class_key)}</h3>
+      <button class="btn" onclick="window.print()">🖨 Print</button><button class="btn" onclick="exportCSV([T.cdata])">⬇ CSV</button></div>
+    <h3 class="only-print" style="display:none">${esc(c.class_key)} — Student Council Election results</h3>
+    ${c.status === 'open' ? '<div class="notice warn" style="margin-bottom:12px">Voting is still open — these results are live and may change.</div>' : ''}
+    <div class="win-grid">${ROLES.map(r => `<div class="win"><div class="lbl">${r.icon} ${r.en} · <span class="ar">${r.ar}</span></div><div class="nm">${winnerText(R[r.key])}</div>${R[r.key].winner ? `<div class="muted small">${R[r.key].winner.v} vote${R[r.key].winner.v===1?'':'s'}</div>` : ''}</div>`).join('')}</div>
+    <p class="muted small">${t} ballot${t===1?'':'s'} · turnout ${pct(c.voted, c.total)}% (${c.voted} of ${c.total}). A student can win only one role: roles are decided in order (Leader → Deputy → Secretary); if the top name already won a role, the next highest wins.</p>
+    ${ROLES.map(r => { const res = R[r.key], max = Math.max(1, ...res.ranking.map(x => x.v));
+      const before = new Set([...(ROLES.slice(0, ROLES.indexOf(r)).map(p => R[p.key].winner && R[p.key].winner.idx))].filter(x => x != null));
+      return `<div class="card res-role"><h3>${r.icon} ${r.en} · <span class="ar">${r.ar}</span></h3>
+        ${res.ranking.map((x, n) => `<div class="res-row ${res.winner && res.winner.idx === x.idx ? 'first' : ''} ${before.has(x.idx) ? 'taken' : ''}"><div class="res-top"><span>${esc(x.name)}${before.has(x.idx) ? ' <span class="pill">won another role</span>' : ''}</span><span>${x.v}${t ? ' · ' + pct(x.v, t) + '%' : ''}</span></div><div class="bar"><i style="width:${x.v / max * 100}%"></i></div></div>`).join('')}
+        ${res.tie ? '<div class="notice warn">Tie — decide with a short re-vote or the school rule.</div>' : ''}</div>`; }).join('')}
+    <div class="danger-zone no-print"><h3 style="color:var(--bad)">Reset this class</h3><p class="muted small">Deletes all ${t} ballot(s) for ${esc(c.class_key)} so the class can vote again. Codes stay the same. This cannot be undone.</p>
+      <button class="btn danger" ${t || c.voted ? '' : 'disabled'} onclick="resetClass()">Delete votes and reset</button></div>`;
+}
+function resetClass(){
+  modal(`<h3>Delete all votes for ${esc(T.cls)}?</h3><p class="muted">Type <b>RESET</b> to confirm. This cannot be undone.</p><input class="input" id="resetIn" autocomplete="off"><div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn danger" onclick="doReset()">Delete votes</button></div>`);
+  setTimeout(() => $('resetIn') && $('resetIn').focus(), 50);
+}
+async function doReset(){
+  if (($('resetIn').value || '').trim().toUpperCase() !== 'RESET') { toast('Type RESET to confirm'); return; }
+  closeModal();
+  try { const r = await adminCall('ev_admin_reset_class', {p_class:T.cls}); if (r.ok) { T.cdata = r.class; toast('Votes deleted'); renderTeacher(); } else toast(errText(r.error)); }
+  catch(e){ if (e.message !== 'login') toast('Connection problem'); }
+}
+
+function tAll(){
+  if (!T.data) return `<div class="card pad center"><div class="spinner"></div></div>`;
+  return `<div class="t-top"><h2>All results</h2><span class="spacer"></span><button class="btn no-print" onclick="window.print()">🖨 Print</button><button class="btn no-print" onclick="exportCSV(T.data)">⬇ CSV (all classes)</button></div>
+    <div class="card tbl-wrap"><table><tr><th>Class</th><th>👑 Leader</th><th>🤝 Deputy</th><th>📝 Secretary</th><th>Turnout</th><th>Status</th></tr>
+    ${T.data.map(c => { const R = resolve(c); return `<tr style="cursor:pointer" onclick="go('class','${c.class_key}','results')"><td><b style="white-space:nowrap">${esc(c.class_key)}</b></td>
+      ${ROLES.map(r => `<td>${winnerText(R[r.key])}</td>`).join('')}<td>${c.voted}/${c.total} (${pct(c.voted,c.total)}%)</td><td>${statusPill(c.status)}</td></tr>`; }).join('')}
+    </table></div>`;
+}
+function exportCSV(classes){
+  const rows = [['Class','Role','Candidate','Votes','Result','Ballots','Voted','Class size','Status']];
+  classes.forEach(c => { const R = resolve(c);
+    ROLES.forEach(r => R[r.key].ranking.forEach(x => rows.push([c.class_key, r.en, x.name, x.v,
+      R[r.key].winner && R[r.key].winner.idx === x.idx ? 'WINNER' : (R[r.key].tie && R[r.key].tie.some(y => y.idx === x.idx) ? 'TIE' : ''), c.ballots, c.voted, c.total, c.status])));
+  });
+  const csv = '﻿' + rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download = 'election-results.csv'; document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* =================== Start =================== */
+(async function boot(){
+  if (await ensureLatest()) return;
+  const p = new URLSearchParams(location.search);
+  const code = p.get('t') || p.get('code');
+  if (code) return studentStart(code);
+  if (p.has('student') || p.has('voter')) return renderLanding('This is an old voting link and no longer works. Please use the new QR slip from your teacher.');
+  const pin = ss('ev-pin');
+  if (pin) { T.pin = pin; T.page = 'dash'; return teacherLoad(); }
+  if (p.has('teacher')) return renderLogin();
+  renderLanding();
+})();
+</script>
+</body>
+</html>
