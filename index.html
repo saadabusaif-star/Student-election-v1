@@ -216,6 +216,7 @@ const VOTER_TOKENS = {"5cRvorexaJWXkYlGSsnIbQ":["GR-7 - A",0],"EkA4wFJj2B15soiXo
 const TEACHER_PIN = 'FA-ICT-2026'; // Change this before publishing if desired.
 const urlParams = new URLSearchParams(location.search);
 const studentToken = urlParams.get('student');
+const poolParam = urlParams.get('pool');
 const voterToken = urlParams.get('voter');
 const voterRecord = VOTER_TOKENS[voterToken] || null;
 const lockedSection = voterRecord ? voterRecord[0] : (Object.keys(CLASS_TOKENS).find(k => CLASS_TOKENS[k] === studentToken) || null);
@@ -227,7 +228,7 @@ let lastCount = null;
 function studentMode(){ return !!lockedSection && !teacherUnlocked; }
 function personalStudentMode(){ return lockedVoter !== null && studentMode(); }
 function restrictedTo(sec){ return !lockedSection || sec === lockedSection; }
-function classLink(sec){ return location.pathname + '?student=' + encodeURIComponent(CLASS_TOKENS[sec]); }
+function classLink(sec){ const pool = S(sec).cands || []; const suffix = pool.length ? '&pool=' + encodeURIComponent(pool.join(',')) : ''; return location.pathname + '?student=' + encodeURIComponent(CLASS_TOKENS[sec]) + suffix; }
 function studentLink(sec, idx){
   const token = Object.keys(VOTER_TOKENS).find(t => VOTER_TOKENS[t][0] === sec && VOTER_TOKENS[t][1] === idx);
   return location.pathname + '?voter=' + encodeURIComponent(token);
@@ -257,6 +258,11 @@ function load(){
 }
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
 function S(k){ return state.sections[k] || (state.sections[k] = {cands:[], votes:{}, voted:[], closed:false}); }
+if (lockedSection && poolParam) {
+  const incomingPool = poolParam.split(',').map(Number).filter(i => Number.isInteger(i) && i >= 0 && i < DATA[lockedSection].length);
+  const lockedState = S(lockedSection);
+  if (incomingPool.length && !lockedState.cands.length) { lockedState.cands = [...new Set(incomingPool)]; save(); }
+}
 function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function initials(n){ const p = n.replace(/[()]/g,'').split(/\s+/).filter(Boolean); return ((p[0]||'')[0] + ((p[1]||'')[0]||'')).toUpperCase(); }
 function short(n){ const p = n.split(/\s+/); return p.length > 3 ? p.slice(0,3).join(' ') : n; }
@@ -303,7 +309,7 @@ function renderHome(){
     <span class="meta">${lockedSection ? lockedSection : ORDER.length + ' sections · ' + ORDER.reduce((a,k)=>a+DATA[k].length,0) + ' students'}</span></div>
   <div class="card quick-start">
     <h3>${lockedSection ? '🔒 ' + lockedSection + ' — class locked' : 'Fast student voting'}</h3>
-    <div class="note">${lockedSection ? 'This link is restricted to this class. Students can see only their own roster and can vote only once.' : 'For a supervised classroom election: choose the section, identify the student, select one candidate, and confirm.'}</div>
+    <div class="note">${lockedSection ? 'This link is restricted to this class. The candidate pool is included in the link, and each student can vote only once.' : 'For a supervised classroom election: choose the section, identify the student, select one candidate, and confirm.'}</div>
     <div class="steps"><div class="step"><b>1</b><span>${lockedSection ? 'Find your name' : 'Choose the student’s section'}</span></div><div class="step"><b>2</b><span>${lockedSection ? 'Choose one candidate' : 'Find the student’s name'}</span></div><div class="step"><b>3</b><span>Confirm one vote</span></div></div>
   </div>
   ${lockedSection ? '' : `<div class="chips">
