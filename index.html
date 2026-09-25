@@ -237,14 +237,10 @@ function showStudentLinks(sec){
   const rows = DATA[sec].map((name, idx) => `<div class="link-row"><span>${esc(name)}</span><button class="btn" onclick="copyStudentLink('${sec}',${idx})">Copy link</button></div>`).join('');
   modal(`<h3>${esc(sec)} personal links</h3><p class="note">Give each student only their own link. It opens one ballot and cannot select another student.</p><div class="student-links">${rows}</div>`);
 }
-function unlockTeacher(){
-  const input = document.getElementById('teacherPin');
-  if (input && input.value === TEACHER_PIN) { teacherUnlocked = true; sessionStorage.setItem('fa-teacher-unlocked','1'); view.page='home'; render(); toast('Teacher mode unlocked'); }
-  else toast('Incorrect teacher PIN');
-}
+function unlockTeacher(){ toast('Teacher controls are not available in the student class panel.'); }
 function lockTeacher(){ teacherUnlocked = false; sessionStorage.removeItem('fa-teacher-unlocked'); location.href = location.pathname; }
 function renderAccessGate(){
-  return `<div class="card access-gate"><div class="gate-icon">🔐</div><h2>Election access required</h2><p class="note">Use your class voting link, or enter the teacher PIN to open election setup and results.</p><div class="gate-actions"><input id="teacherPin" class="search" type="password" placeholder="Teacher PIN" autocomplete="off" onkeydown="if(event.key==='Enter')unlockTeacher()"><button class="btn primary" onclick="unlockTeacher()">Open teacher mode</button></div><p class="gate-help">Students must use the private link given by their teacher.</p></div>`;
+  return `<div class="card access-gate"><div class="gate-icon">🔒</div><h2>Class link required</h2><p class="note">Open the private link for your own class to vote. The main website does not open election controls.</p><p class="gate-help">Ask your teacher for your class voting link.</p></div>`;
 }
 
 function load(){
@@ -363,14 +359,12 @@ function toggleCand(i){
 function clearCands(){ S(view.sec).cands = []; save(); render(); }
 
 function renderVote(k, s){
-  if (studentMode() && !personalStudentMode()) return `<div class="card panel access-gate"><div class="gate-icon">🔗</div><h2>Personal link required</h2><p class="note">This is a class link, not a personal ballot. Ask your teacher for your own student voting link.</p></div>`;
   if (!s.cands.length) return `<div class="card empty">Pick candidates first. <br><br><button class="btn primary" onclick="view.tab='cands';render()">Choose candidates</button></div>`;
   const t = total(k), n = DATA[k].length, pct = Math.round(t / n * 100);
   return `
   <div class="card panel">
-    <b>${personalStudentMode() ? 'Your personal ballot' : 'Student voting mode'}</b>
-    <p class="note">${personalStudentMode() ? 'This private link is assigned to one student. Choose one candidate and confirm once.' : 'Recommended flow: give each student a personal link. Each link opens one ballot and cannot select another student.'}</p>
-    ${teacherUnlocked ? `<div class="row"><button class="btn" onclick="showStudentLinks('${k}')">🔗 Create personal student links</button><span class="note">Copy one private link per student.</span></div>` : ''}
+    <b>Class voting panel</b>
+    <p class="note">Select your own name from this class, choose one candidate, and confirm. Each name can vote only once in this class.</p>
     <div class="row" style="margin-top:16px">
       <button class="btn primary" onclick="openKiosk()" ${s.closed?'disabled':''} style="padding:12px 20px">▶ ${personalStudentMode() ? 'Open my ballot' : 'Open voting screen'}</button>
       ${s.closed ? '<span class="note">Voting is closed — reopen it in Results.</span>' : ''}
@@ -470,7 +464,6 @@ function resetAll(){ if (!teacherUnlocked) { toast('Reset is available only in t
 /* ---------- Kiosk ---------- */
 let kState = {step:'name', voter:null, q:''};
 function openKiosk(){
-  if (studentMode() && !personalStudentMode()) { toast('Your personal student link is required'); return; }
   if (studentMode() && view.sec !== lockedSection) { toast('This device is locked to ' + lockedSection); return; }
   const already = personalStudentMode() && S(view.sec).voted.includes(lockedVoter);
   kState = {step: already ? 'done' : (personalStudentMode() ? 'vote' : ((studentMode() || state.requireName) ? 'name' : 'vote')), voter: personalStudentMode() ? lockedVoter : null, q:''};
