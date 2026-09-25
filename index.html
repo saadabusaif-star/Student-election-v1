@@ -363,6 +363,7 @@ function toggleCand(i){
 function clearCands(){ S(view.sec).cands = []; save(); render(); }
 
 function renderVote(k, s){
+  if (studentMode() && !personalStudentMode()) return `<div class="card panel access-gate"><div class="gate-icon">🔗</div><h2>Personal link required</h2><p class="note">This is a class link, not a personal ballot. Ask your teacher for your own student voting link.</p></div>`;
   if (!s.cands.length) return `<div class="card empty">Pick candidates first. <br><br><button class="btn primary" onclick="view.tab='cands';render()">Choose candidates</button></div>`;
   const t = total(k), n = DATA[k].length, pct = Math.round(t / n * 100);
   return `
@@ -469,6 +470,7 @@ function resetAll(){ if (!teacherUnlocked) { toast('Reset is available only in t
 /* ---------- Kiosk ---------- */
 let kState = {step:'name', voter:null, q:''};
 function openKiosk(){
+  if (studentMode() && !personalStudentMode()) { toast('Your personal student link is required'); return; }
   if (studentMode() && view.sec !== lockedSection) { toast('This device is locked to ' + lockedSection); return; }
   const already = personalStudentMode() && S(view.sec).voted.includes(lockedVoter);
   kState = {step: already ? 'done' : (personalStudentMode() ? 'vote' : ((studentMode() || state.requireName) ? 'name' : 'vote')), voter: personalStudentMode() ? lockedVoter : null, q:''};
