@@ -225,6 +225,41 @@ let teacherUnlocked = false;
 let state = load();
 let view = {page:'home', sec:null, tab:'cands', grade:'all', q:''};
 let lastCount = null;
+const SUPABASE_URL = 'https://yvsskbtfabaqcgsfvreo.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_B_IMB98ZXj2uKFGoAuwuqg_PLTWRYjF';
+async function liveRequest(path, options={}){
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, { ...options, headers:{ apikey:SUPABASE_KEY, Authorization:'Bearer '+SUPABASE_KEY, 'Content-Type':'application/json', ...(options.headers||{}) }});
+  if (!res.ok) throw new Error('Live election request failed: '+res.status);
+  const text = await res.text(); return text ? JSON.parse(text) : null;
+}
+async function hydrateLiveSection(sec){
+  const s = S(sec);
+  try {
+    const rows = await liveRequest('election_sessions?class_key=eq.'+encodeURIComponent(sec)+'&select=class_key,active,candidates');
+    const row = rows && rows[0];
+    if (row) { s.cands = Array.isArray(row.candidates) ? row.candidates.map(Number).filter(i => DATA[sec][i] != null) : []; s.active = !!row.active; }
+    else { s.active = false; }
+    const votes = await liveRequest('election_votes?class_key=eq.'+encodeURIComponent(sec)+'&select=student_index,candidate_index');
+    s.votes = {}; s.voted = [];
+    (votes || []).forEach(v => { s.votes[v.candidate_index] = (s.votes[v.candidate_index]||0)+1; if (!s.voted.includes(v.student_index)) s.voted.push(v.student_index); });
+    s.liveLoaded = true; save(); render();
+  } catch(err) { s.liveLoaded = true; s.active = false; render(); toast('Live election connection unavailable'); }
+}
+async function liveSetSession(sec, active){
+  const s = S(sec);
+  await liveRequest('election_sessions', {method:'POST', headers:{Prefer:'resolution=merge-duplicates,return=minimal'}, body:JSON.stringify({class_key:sec, active, candidates:s.cands, updated_at:new Date().toISOString()})});
+  s.liveLoaded = true; s.active = active; save();
+}
+async function liveCastVote(sec, studentIndex, candidateIndex){
+  try {
+    await liveRequest('election_votes', {method:'POST', headers:{Prefer:'return=minimal'}, body:JSON.stringify({class_key:sec, student_index:studentIndex, candidate_index:candidateIndex})});
+    return true;
+  } catch(err) {
+    if (String(err.message).includes('409')) toast('This student has already voted'); else toast('Vote was not saved. Check the connection.');
+    return false;
+  }
+}
+
 function studentMode(){ return !!lockedSection && !teacherUnlocked; }
 function personalStudentMode(){ return lockedVoter !== null && studentMode(); }
 function restrictedTo(sec){ return !lockedSection || sec === lockedSection; }
@@ -293,11 +328,13 @@ function go(page, sec, tab){
   view.page = page; if (sec) view.sec = sec; if (tab) view.tab = tab; view.q = '';
   render(); window.scrollTo(0,0);
 }
-function startStudentVoting(sec){
+async function startStudentVoting(sec){
+  if (!teacherUnlocked) { toast('Teacher must start this class first'); return; }
   const s = S(sec);
   if (!s.cands.length){ toast('Candidates must be selected first'); go('sec', sec, 'cands'); return; }
   if (s.closed){ toast('Voting is closed for this section'); return; }
-  view.sec = sec; openKiosk();
+  try { await liveSetSession(sec, true); view.sec = sec; openKiosk(); render(); toast(sec + ' voting is now live'); }
+  catch(err){ toast('Could not start the live class session'); }
 }
 
 /* ---------- Home ---------- */
@@ -322,7 +359,7 @@ function renderHome(){
       <div class="row"><h3>${k}</h3><span class="spacer"></span><span class="badge ${cls}">${txt}</span></div>
       <div class="meta">${DATA[k].length} students · ${s.cands.length} candidates · ${total(k)} votes</div>
       ${w ? `<div class="win">🏆 ${w.tie ? 'Tie ('+w.names.length+')' : esc(short(w.name))} — ${w.v}</div>` : ''}
-      <span class="btn primary start" onclick="event.stopPropagation();startStudentVoting('${k}')">▶ Start student voting</span>
+      ${teacherUnlocked ? `<span class="btn primary start" onclick="event.stopPropagation();startStudentVoting('${k}')">▶ Start student voting</span>` : ''}
       ${!lockedSection ? `<span class="class-link" onclick="event.stopPropagation();copyClassLink('${k}')">🔗 Copy locked ${esc(k)} link</span><span class="class-link qr-trigger" onclick="event.stopPropagation();showClassQR('${k}')">▣ Show large QR</span>` : ''}
     </button>`; }).join('')}
   </div>`;
@@ -373,6 +410,8 @@ function toggleCand(i){
 function clearCands(){ S(view.sec).cands = []; save(); render(); }
 
 function renderVote(k, s){
+  if (studentMode() && !s.liveLoaded) return `<div class="card empty">🔄 Loading the teacher's live voting session…</div>`;
+  if (studentMode() && s.liveLoaded && !s.active) return `<div class="card empty"><div style="font-size:42px">⏳</div><h3>Voting has not started</h3><p class="note">Your teacher must start ${esc(k)} from teacher mode. Please wait for the teacher to activate this class.</p></div>`;
   if (!s.cands.length) return `<div class="card empty">Pick candidates first. <br><br><button class="btn primary" onclick="view.tab='cands';render()">Choose candidates</button></div>`;
   const t = total(k), n = DATA[k].length, pct = Math.round(t / n * 100);
   return `
@@ -435,7 +474,7 @@ function renderResults(k, s){
     <button class="btn danger" onclick="resetVotes()">Reset votes</button>
   </div>` : `<div class="card panel student-safety">🔒 Student mode: results and reset controls are disabled.</div>`} // no student admin controls`;
 }
-function toggleClose(){ if (!teacherUnlocked) { toast('Teacher permission required'); return; } const s = S(view.sec); s.closed = !s.closed; save(); render(); toast(s.closed?'Voting closed':'Voting reopened'); }
+async function toggleClose(){ if (!teacherUnlocked) { toast('Teacher permission required'); return; } const s = S(view.sec); s.closed = !s.closed; try { await liveSetSession(view.sec, !s.closed); save(); render(); toast(s.closed?'Voting closed':'Voting reopened'); } catch(err){ toast('Could not update live class status'); } }
 function resetVotes(){ if (!teacherUnlocked) { toast('Reset is available only in teacher mode'); return; } confirmBox('Reset votes?', `All votes for ${view.sec} will be deleted. Candidates stay.`, 'Reset', () => { const s = S(view.sec); s.votes = {}; s.voted = []; s.closed = false; save(); render(); toast('Votes reset'); }, true); }
 
 /* ---------- Summary ---------- */
@@ -529,11 +568,12 @@ function pick(c){
     <div class="row" style="justify-content:center;margin-top:16px"><button class="btn" onclick="closeModal()">Go back</button>
     <button class="btn primary" style="padding:10px 22px" onclick="castVote(${c})">✓ Confirm vote</button></div>`);
 }
-function castVote(c){
-  const s = S(view.sec); closeModal(); if (s.closed) return;
+async function castVote(c){
+  const s = S(view.sec); closeModal(); if (s.closed || (studentMode() && s.active === false)) return;
   if (studentMode() && kState.voter == null) { toast('Select your name before voting'); return; }
   if (personalStudentMode() && lockedVoter == null) { toast('Invalid personal student link'); return; }
   if (kState.voter != null && s.voted.includes(kState.voter)) { toast('This student has already voted'); kState.step='name'; kState.voter=null; drawKiosk(); return; }
+  if (studentMode()) { const saved = await liveCastVote(view.sec, kState.voter, c); if (!saved) return; }
   s.votes[c] = (s.votes[c]||0) + 1;
   if (kState.voter != null && !s.voted.includes(kState.voter)) s.voted.push(kState.voter);
   save(); kState.step = 'thanks'; drawKiosk();
@@ -608,6 +648,7 @@ function render(){
   setLanguage(localStorage.getItem('fa-election-language') || 'en');
 }
 render();
+if (lockedSection) hydrateLiveSection(lockedSection);
 </script>
 </body>
 </html>
