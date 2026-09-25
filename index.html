@@ -142,6 +142,8 @@ h2,h3,h4,.ttl{font-family:"Baloo 2","Segoe UI",sans-serif}
 .student-links{max-height:55vh;overflow:auto;text-align:left;margin-top:14px}.link-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}.link-row span{flex:1;font-size:13px}.link-row .btn{padding:6px 10px;font-size:12px}
 
 .qr-large{display:block;width:min(700px,90vw);height:auto;margin:16px auto;border:12px solid #fff;border-radius:16px;box-shadow:0 8px 26px rgba(8,27,69,.2)}.qr-trigger{color:var(--navy);cursor:pointer}.ar .letter-col.en{font-family:"Nunito",sans-serif}.ar .site-nav,.ar .footer-grid{text-align:right}.ar .quick-start,.ar .card{text-align:right}
+
+.modal{padding:clamp(8px,2vw,20px);overflow:auto}.modal .box:has(.qr-large){max-width:min(760px,94vw);max-height:92vh;overflow:auto;padding:clamp(12px,2.5vw,24px)}.qr-large{width:min(650px,100%);max-width:100%;height:auto;max-height:68vh;object-fit:contain;margin:12px auto;border:clamp(5px,1.2vw,12px) solid #fff}.modal .box:has(.qr-large) .row{justify-content:center}@media(max-width:600px){.modal .box:has(.qr-large){max-width:96vw;max-height:90vh;padding:12px}.qr-large{max-height:58vh}.modal .box h3{font-size:19px}}
 </style>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -502,6 +504,7 @@ function drawKiosk(){
   } else {
     b.innerHTML = `<div class="thanks"><div class="big">✅</div><div class="k-title">Thank you for voting!</div><div class="k-sub">Please pass the device to the next student.</div></div>`;
   }
+  if (localStorage.getItem('fa-election-language') === 'ar') translateVisibleArabic();
 }
 function drawNames(){
   const k = view.sec, s = S(k), q = kState.q.trim().toLowerCase(), el = document.getElementById('knames'); if (!el) return;
@@ -557,8 +560,22 @@ function showClassQR(sec){
   const qr = qrImageUrl(target);
   modal(`<h3>QR code · ${esc(sec)}</h3><p class="note">Scan this large code to open the locked class voting page.</p><img class="qr-large" src="${qr}" alt="QR code for ${esc(sec)}" loading="eager"><div class="row" style="justify-content:center;margin-top:14px"><a class="btn primary" href="${qr}" target="_blank" rel="noopener">Open QR image</a><button class="btn" onclick="closeModal()">Close</button></div>`);
 }
+function translateVisibleArabic(){
+  const roots = [document.getElementById('app'), document.getElementById('kBody'), document.getElementById('modalBox')].filter(Boolean);
+  const pairs = [
+    ['Choose a class section','اختيار شعبة الصف'],['Fast student voting','تصويت طلابي سريع'],['For a supervised classroom election: choose the section, identify the student, select one candidate, and confirm.','لانتخابات صفية بإشراف المعلم: اختر الشعبة، ثم حدّد اسمك، واختر مرشحاً واحداً وأكد تصويتك.'],['All grades','كل الصفوف'],['Grade 7','الصف السابع'],['Grade 8','الصف الثامن'],['Grade 9','الصف التاسع'],['Grade 10','الصف العاشر'],['Grade 11','الصف الحادي عشر'],['Grade 12','الصف الثاني عشر'],['students','طلاب'],['sections','شُعب'],['votes','أصوات'],['Not started','لم يبدأ'],['Voting','التصويت جارٍ'],['Finished','اكتمل'],['Start student voting','بدء تصويت الطلاب'],['Copy locked','نسخ رابط القفل'],['Show large QR','إظهار رمز QR كبير'],['Your class voting','تصويت صفك'],['class locked','الصف مقفل'],['This link is restricted to this class. Students can see only their own roster and can vote only once.','هذا الرابط مخصص لهذا الصف فقط. يمكن للطلاب رؤية قائمة صفهم والتصويت مرة واحدة فقط.'],['Find your name','ابحث عن اسمك'],['Choose one candidate','اختر مرشحاً واحداً'],['Confirm one vote','أكد تصويتاً واحداً'],['Class voting panel','لوحة التصويت للصف'],['Select your own name from this class, choose one candidate, and confirm. Each name can vote only once in this class.','اختر اسمك من هذا الصف، ثم اختر مرشحاً واحداً وأكد تصويتك. يمكن لكل اسم التصويت مرة واحدة فقط في هذا الصف.'],['Open voting screen','فتح شاشة التصويت'],['Open my ballot','فتح بطاقة التصويت الخاصة بي'],['Votes cast','الأصوات المسجلة'],['Class size','عدد طلاب الصف'],['Turnout','نسبة المشاركة'],['Student voting','تصويت الطلاب'],['Candidates','المرشحون'],['Device voting','التصويت عبر الجهاز'],['Count paper ballots','فرز بطاقات الاقتراع الورقية'],['Results','النتائج'],['All results','كل النتائج'],['Back','رجوع'],['Select the candidates','اختيار المرشحين'],['Clear','مسح'],['Next: start voting','التالي: بدء التصويت'],['Tap students who are running for class representative.','اضغط على الطلاب المرشحين لممثل الصف.'],['Search student name','البحث عن اسم الطالب'],['No match','لا توجد مطابقة'],['No candidates yet.','لا يوجد مرشحون بعد.'],['Choose candidates','اختيار المرشحين'],['Count paper ballots','فرز بطاقات الاقتراع'],['Undo','تراجع'],['Total:','الإجمالي:'],['Read each ballot and tap','اقرأ كل بطاقة واضغط'],['Class representative','ممثل الصف'],['Tie — revote needed','تعادل — يلزم إعادة التصويت'],['Print','طباعة'],['Reset votes','إعادة ضبط الأصوات'],['Reset everything','إعادة ضبط الكل'],['Backup & transfer','النسخ الاحتياطي والنقل'],['Download backup','تنزيل النسخة الاحتياطية'],['Restore backup','استعادة النسخة الاحتياطية'],['Voting is closed','التصويت مغلق'],['Please pass the device to the next student.','يرجى تمرير الجهاز إلى الطالب التالي.'],['Thank you for voting!','شكراً لتصويتك!'],['Find your name','ابحث عن اسمك'],['Type your name','اكتب اسمك'],['Choose your class representative','اختر ممثل صفك'],['tap one candidate','اضغط على مرشح واحد'],['Go back','عودة'],['Confirm vote','تأكيد التصويت'],['Not me','ليس أنا'],['Personal link required','الرابط الشخصي مطلوب'],['Close','إغلاق'],['Open QR image','فتح صورة QR'],['Scan this large code to open the locked class voting page.','امسح هذا الرمز الكبير لفتح صفحة التصويت المقفلة للصف.']
+  ];
+  roots.forEach(root => {
+    let html = root.innerHTML;
+    pairs.forEach(([en,ar]) => { html = html.split(en).join(ar); });
+    root.innerHTML = html;
+  });
+}
+
 function setLanguage(lang){
+  const wasArabic = document.documentElement.lang === 'ar';
   localStorage.setItem('fa-election-language', lang);
+  if (lang === 'en' && wasArabic) { location.reload(); return; }
   document.documentElement.lang = lang === 'ar' ? 'ar' : 'en';
   document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
   document.body.classList.toggle('ar', lang === 'ar');
@@ -566,9 +583,10 @@ function setLanguage(lang){
   document.getElementById('btnAr').classList.toggle('active', lang === 'ar');
   const t = {
     en:{tagline:'Building Brave Tomorrow',studentElection:'Student election',chooseSection:'Choose section',allResults:'All results',votingRules:'Voting rules',holdToExit:'Hold to exit',academy:'The First Academy',footerAbout:'A student election page supporting safe, meaningful, and fair student leadership choices.',quickLinks:'Quick links',contact:'Contact'},
-    ar:{tagline:'نبني غداً شجاعاً',studentElection:'انتخابات الطلاب',chooseSection:'اختيار الصف',allResults:'كل النتائج',votingRules:'قواعد التصويت',holdToExit:'اضغط مطولاً للخروج',academy:'الأكاديمية الأولى',footerAbout:'صفحة انتخابات طلابية تدعم اختيارات آمنة وهادفة وعادلة لقيادة الطلاب.',quickLinks:'روابط سريعة',contact:'تواصل معنا',classVotingPanel:'لوحة التصويت للصف',classVotingNote:'اختر اسمك من هذا الصف، ثم اختر مرشحاً واحداً وأكد تصويتك. يمكن لكل اسم التصويت مرة واحدة فقط في هذا الصف.'}
+    ar:{tagline:'نبني غداً شجاعاً',studentElection:'انتخابات الطلاب',chooseSection:'اختيار الصف',allResults:'كل النتائج',votingRules:'قواعد التصويت',holdToExit:'اضغط مطولاً للخروج',academy:'الأكاديمية الأولى',footerAbout:'صفحة انتخابات طلابية تدعم اختيارات آمنة وهادفة وعادلة لقيادة الطلاب.',quickLinks:'روابط سريعة',contact:'تواصل معنا'}
   }[lang];
   document.querySelectorAll('[data-i18n]').forEach(el => { if (t[el.dataset.i18n]) el.textContent = t[el.dataset.i18n]; });
+  if (lang === 'ar') translateVisibleArabic();
 }
 
 function render(){
