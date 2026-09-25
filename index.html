@@ -340,10 +340,15 @@ function go(page, sec, tab){
 async function startStudentVoting(sec){
   if (!teacherUnlocked) { toast('Teacher must start this class first'); return; }
   const s = S(sec);
-  if (!s.cands.length){ toast('Candidates must be selected first'); go('sec', sec, 'cands'); return; }
+  if (!s.cands.length){ toast('Select at least one candidate before starting ' + sec); go('sec', sec, 'cands'); return; }
   if (s.closed){ toast('Voting is closed for this section'); return; }
-  try { await liveSetSession(sec, true); view.sec = sec; openKiosk(); render(); toast(sec + ' voting is now live'); }
-  catch(err){ toast('Could not start the live class session'); }
+  try {
+    toast('Activating ' + sec + ' for all students…');
+    await liveSetSession(sec, true);
+    await hydrateLiveSection(sec);
+    view.sec = sec; view.page='sec'; view.tab='vote'; openKiosk(); render();
+    toast(sec + ' voting is now live — the shared QR/link is active');
+  } catch(err){ console.error(err); toast('Could not activate the shared student link. Please check Supabase connection.'); }
 }
 
 /* ---------- Home ---------- */
